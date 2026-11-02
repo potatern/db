@@ -12,6 +12,8 @@
 -- check ? marks
 -- check enum usage
 -- fix places where more than one PK
+-- check syntax
+-- check constraints
 
 CREATE TABLE airport ( -- E1
     airport_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -32,6 +34,32 @@ CREATE TABLE airplane ( -- E2
     widght numeric(3,2) NOT NULL,
     lenght numeric(3,2) NOT NULL,
     hight numeric(2,2) NOT NULL
+
+    CONSTRAINT fk_airplane_object
+        FOREIGN KEY (airplane_id)
+        REFERENCES journaling_object(object_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_airplane_airport
+        FOREIGN KEY (airport_id)
+        REFERENCES airport(airport_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_airplane_object -- ???
+        FOREIGN KEY (airport_id)
+        REFERENCES hangar(airport_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAiNT fk_airplane_hangar
+        FOREIGN KEY (hangar_number)
+        REFERENCES hangar(hangar_number)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_airplane_status
+        FOREIGN KEY (status_id)
+        REFERENCES flight_status(status_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TYPE object_type AS ENUM (
@@ -45,6 +73,11 @@ CREATE TYPE airplane_states AS ENUM (
 CREATE TABLE flight_status ( -- E3
     status_id bigint NOT NULL PRIMARY KEY,
     status airplane_states,
+    CONSTRAINT fk_status_object
+        FOREIGN KEY (status_id)
+        REFERENCES journaling_object(object_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE plane_positions ( -- E4
@@ -56,18 +89,38 @@ CREATE TABLE plane_positions ( -- E4
     tangage numeric(3,2) NOT NULL, -- ????!!!
     direction numeric(3,3) NOT NULL,
     speed numeric(3,2) NOT NULL,
-    time_utc timestamp NOT NULL
+    time_utc timestamp NOT NULL,
+    CONSTRAINT fk_position_airplane
+        FOREIGN KEY (airplane_id)
+        REFERENCES airplane(airplane_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE flight ( -- E5
     flight_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     airplane_id bigint NOT NULL,
     employee_id bigint NOT NULL,
-    takeoff_line??_id bigint NOT NULL,
+    takeoff_line_id bigint NOT NULL,
     takeoff_time timestamp,
     land_time timestamp,
     planned_land_time timestamp,
-    actual_land_time timestamp
+    actual_land_time timestamp,
+    CONSTRAINT fk_flight_airplane
+        FOREIGN KEY (airplane_id)
+        REFERENCES airplane(airplane_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_flight_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employee(employee_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_flight_line
+        FOREIGN KEY (takeoff_line_id)
+        REFERENCES line(line_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE employee ( -- E6
@@ -78,7 +131,17 @@ CREATE TABLE employee ( -- E6
     otchestvo?? text,
     birthdate date NOT NULL,
     working_place text NOT NULL, -- ??
-    informatoin text -- ??
+    informatoin text, -- ??
+    CONSTRAINT fk_employee_object
+        FOREIGN KEY (employee_id)
+        REFERENCES journaling_object(object_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_employee_position
+        FOREIGN KEY (position_id)
+        REFERENCES employee_position(position_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE employee_position ( -- E7 ??
@@ -107,7 +170,22 @@ CREATE TABLE boarding_pass ( -- E9 ticket??
     flight_id bigint NOT NULL,
     seat text NOT NULL, -- int??
     class class NOT NULL,
-    gate int -- ??
+    gate int, -- ??
+    CONSTRAINT fk_ticket_object
+        FOREIGN KEY (ticket_id)
+        REFERENCES journaling_object(object_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_ticket_passanger
+        FOREIGN KEY (passanger_id)
+        REFERENCES passanger(passanger_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_ticket_flight
+        FOREIGN KEY (flight_id)
+        REFERENCES flight(flight_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE line ( -- E10
@@ -119,7 +197,17 @@ CREATE TABLE line ( -- E10
     altitude numeric(5,1) NOT NULL, -- ??
     widght numeric(2,2) NOT NULL,
     lenght numeric(4,2) NOT NULL,
-    direction numeric(3,3) NOT NULL
+    direction numeric(3,3) NOT NULL,
+    CONSTRAINT fk_line_object
+        FOREIGN KEY (line_id)
+        REFERENCES journaling_object(object_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_line_airport
+        FOREIGN KEY (airport_id)
+        REFERENCES airport(airport_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE hangar ( -- E11
@@ -129,7 +217,12 @@ CREATE TABLE hangar ( -- E11
     lenght numeric(3,2) NOT NULL,
     hight numeric(2,2) NOT NULL,
     latitude numeric(3,10) NOT NULL, -- ??
-    longitude numeric(3,10) NOT NULL -- ??
+    longitude numeric(3,10) NOT NULL, -- ??
+    CONSTRAINT fk_hangar_airport
+        FOREIGN KEY (airport_id)
+        REFERENCES airport(airport_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE journal ( -- E12
@@ -137,24 +230,59 @@ CREATE TABLE journal ( -- E12
     airport_id bigint,
     object_id bigint,
     action_time timestamp NOT NULL,
-    action_discription text NOT NULL
+    action_discription text NOT NULL,
+    CONSTRAINT fk_journal_airport
+        FOREIGN KEY (airport_id)
+        REFERENCES airport(airport_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_journal_object
+        FOREIGN KEY (object_id)
+        REFERENCES journaling_object(object_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE landing ( -- E13
     landing_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     flight_id bigint NOT NULL,
     line_id bigint,
-    landing_time timestamp NOT NULL
+    landing_time timestamp NOT NULL,
+    CONSTRAINT fk_landing_flight
+        FOREIGN KEY (flight_id)
+        REFERENCES flight(flight_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_landing_line
+        FOREIGN KEY (line_id)
+        REFERENCES line(line_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE airplane_master ( -- E14 ??
     mastering_id bigint GENERATED ALWAYS AS IDenTITY PRIMARY KEY, -- ??
     airplane_id bigint NOT NULL,
-    employee_id bigint NOT NULL
+    employee_id bigint NOT NULL,
+    CONSTRAINT fk_master_airplane
+        FOREIGN KEY (airplane_id)
+        REFERENCES airplane(airplane_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_master_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employee(employee_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE journaling_object ( -- E15
     object_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     journal_id bigint NOT NULL,
-    object_type object_type NOT NULL
+    object_type object_type NOT NULL,
+    CONSTRAINT fk_object_journal
+        FOREIGN KEY (journal_id)
+        REFERENCES journal(journal_id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
