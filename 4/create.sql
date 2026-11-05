@@ -1,8 +1,3 @@
--- units: coordinates/pitch/direction in degrees
--- dimensions/altitude/radius in metres
--- speed in metres per second
--- event timestamps store absolute instants (timestamptz)
-
 BEGIN;
 
 CREATE TABLE airport (
@@ -197,7 +192,6 @@ CREATE TABLE journaling_object (
     journal_id bigint NOT NULL,
     object_type object_type NOT NULL
 );
-
 
 ALTER TABLE airplane
     ADD CONSTRAINT fk_airplane_object FOREIGN KEY (airplane_id)
