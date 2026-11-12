@@ -189,7 +189,6 @@ CREATE TABLE airplane_master (
 
 CREATE TABLE journaling_object (
     object_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    journal_id bigint NOT NULL,
     object_type object_type NOT NULL
 );
 
@@ -286,7 +285,7 @@ ALTER TABLE journal
 ALTER TABLE journal
     ADD CONSTRAINT fk_journal_object FOREIGN KEY (object_id)
     REFERENCES journaling_object(object_id)
-    ON DELETE RESTRICT ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+    ON DELETE RESTRICT ON UPDATE CASCADE;
 
 ALTER TABLE landing
     ADD CONSTRAINT fk_landing_flight FOREIGN KEY (flight_id)
@@ -306,11 +305,6 @@ ALTER TABLE airplane_master
 ALTER TABLE airplane_master
     ADD CONSTRAINT fk_master_employee FOREIGN KEY (employee_id)
     REFERENCES employee(employee_id)
-    ON DELETE RESTRICT ON UPDATE CASCADE;
-
-ALTER TABLE journaling_object
-    ADD CONSTRAINT fk_object_journal FOREIGN KEY (journal_id)
-    REFERENCES journal(journal_id)
     ON DELETE RESTRICT ON UPDATE CASCADE;
 
 COMMIT;
