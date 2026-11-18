@@ -10,6 +10,37 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
+CITIES = (
+    ('Москва', 55.7558, 37.6173), ('Тверь', 56.8587, 35.9176),
+    ('Тула', 54.1931, 37.6173), ('Калуга', 54.5138, 36.2612),
+    ('Рязань', 54.6292, 39.7364), ('Владимир', 56.1291, 40.4066),
+    ('Иваново', 56.9995, 40.9737), ('Ярославль', 57.6261, 39.8845),
+    ('Кострома', 57.7679, 40.9269), ('Смоленск', 54.7826, 32.0453),
+    ('Брянск', 53.2436, 34.3634), ('Орёл', 52.9685, 36.0692),
+    ('Курск', 51.7304, 36.1926), ('Воронеж', 51.6608, 39.2003),
+    ('Липецк', 52.6102, 39.5947), ('Тамбов', 52.7212, 41.4523),
+    ('Нижний Новгород', 56.3269, 44.0059), ('Пенза', 53.1959, 45.0183),
+)
+AIRPORT_NAMES = (
+    'Ещё кружочек', 'Попутный гусь', 'Крылатый пельмень',
+    'Без паники', 'Чемодан надежды', 'Небесный карась',
+    'Мягкая посадочка', 'Взлётный бутерброд', 'Облако в тапочках',
+    'Летучий самовар', 'Турбулентный хомяк', 'Почти на месте',
+    'Багажный экспресс', 'Счастливый шасси', 'Зефирный горизонт',
+)
+MALE_NAMES = ('Аркадий', 'Борис', 'Василий', 'Геннадий', 'Григорий', 'Егор',
+              'Ернест', 'Игнат', 'Лев', 'Мирон', 'Никита', 'Платон', 'Семён', 'Фёдор', 'Яков')
+FEMALE_NAMES = ('Аглая', 'Алиса', 'Варвара', 'Вера', 'Галина', 'Дарья', 'Евдокия',
+                'Зоя', 'Инна', 'Кира', 'Лада', 'Нина', 'Полина', 'Таисия', 'Яна')
+SURNAMES = ('Бублик', 'Карась', 'Самовар', 'Вареник', 'Компот', 'Сухарик',
+            'Пельмень', 'Чемодан', 'Кекс', 'Пряник', 'Штрудель', 'Пончик',
+            'Барабан', 'Сквозняк', 'Крендель', 'Кабачок', 'Патиссон', 'Шпунтик',
+            'Ландыш', 'Туман', 'Круассан', 'Баклажан', 'Филин', 'Пломбир')
+PATRONYMICS = (('Аркадьевич', 'Аркадьевна'), ('Борисович', 'Борисовна'),
+               ('Васильевич', 'Васильевна'), ('Геннадьевич', 'Геннадьевна'),
+               ('Львович', 'Львовна'), ('Платонович', 'Платоновна'),
+               ('Семёнович', 'Семёновна'), ('Фёдорович', 'Фёдоровна'))
+COUNTRIES = ('Россия', 'Беларусь', 'Казахстан', 'Армения', 'Сербия', 'Грузия')
 STATES = (
     'in flight', 'ready to takeoff', 'ready to land',
     'broken', 'checking', 'waiting checking',
@@ -42,10 +73,10 @@ IDENTITY = {
 
 def arguments(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--airports', type=int, default=3)
-    parser.add_argument('--airplanes', type=int, default=12)
-    parser.add_argument('--flights', type=int, default=100)
-    parser.add_argument('--passengers', type=int, default=300)
+    parser.add_argument('--airports', type=int, default=9)
+    parser.add_argument('--airplanes', type=int, default=36)
+    parser.add_argument('--flights', type=int, default=300)
+    parser.add_argument('--passengers', type=int, default=900)
     parser.add_argument('--max-tickets', type=int, default=12)
     parser.add_argument('--position-step', type=int, default=30)
     parser.add_argument('--seed', type=int, default=40)
@@ -157,6 +188,15 @@ def generate(args):
     registration = args.start - timedelta(days=1)
     snapshot = args.start + timedelta(days=(args.flights + args.airplanes - 1) // args.airplanes + 2, hours=12)
     scenarios = Counter()
+    occupied_runways = set()
+
+    def person():
+        gender = rng.randrange(2)
+        firstname = rng.choice((MALE_NAMES, FEMALE_NAMES)[gender])
+        lastname = rng.choice(SURNAMES)
+        middle_name = rng.choice(PATRONYMICS)[gender] if rng.random() < 0.8 else None
+        birthdate = date(rng.randint(1965, 2005), rng.randint(1, 12), rng.randint(1, 28))
+        return firstname, lastname, middle_name, birthdate
 
     def add_event(object_id, airport_id, when, description):
         rows['journal'].append((len(rows['journal']) + 1, airport_id, object_id, when, description))
@@ -168,10 +208,12 @@ def generate(args):
         return object_id
 
     for airport_id in range(1, args.airports + 1):
-        lat = round(50 + rng.uniform(0, 2), 7)
-        lon = round(35 + rng.uniform(0, 2), 7)
+        city, city_lat, city_lon = CITIES[(airport_id - 1) % len(CITIES)]
+        lat = round(city_lat + rng.uniform(-0.08, 0.08), 7)
+        lon = round(city_lon + rng.uniform(-0.08, 0.08), 7)
         altitude = round(rng.uniform(100, 300), 2)
-        rows['airport'].append((airport_id, lat, lon, altitude, 30000, f'DemoCity{airport_id}', 'Testland', f'Demo Airport {airport_id}'))
+        name = f'{city} — {AIRPORT_NAMES[(airport_id - 1) % len(AIRPORT_NAMES)]} №{airport_id}'
+        rows['airport'].append((airport_id, lat, lon, altitude, rng.choice((25000, 30000, 40000)), city, 'Россия', name))
         for hangar in (1, 2):
             rows['hangar'].append((hangar, airport_id, 80, 90, 25, lat, lon))
     for i, state in enumerate(STATES, 1):
@@ -182,7 +224,7 @@ def generate(args):
 
     def create_employee(role, airport):
         employee_id = register_object('employee', airport)
-        rows['employee'].append((employee_id, role, f'Demo{employee_id}', 'Employee', None if employee_id % 2 else 'Example', date(1980 + employee_id % 20, 1 + employee_id % 12, 1 + employee_id % 27), f'Demo Airport {airport}', f'DEMO-CONTRACT-{employee_id}'))
+        rows['employee'].append((employee_id, role, *person(), rows['airport'][airport - 1][7], f'ТРУД-{employee_id:06d}'))
         return employee_id
 
     for airport_id in range(1, args.airports + 1):
@@ -200,7 +242,7 @@ def generate(args):
         home = i % args.airports + 1
         planes.append((register_object('airplane', home), create_employee(1, home), home))
     for i in range(1, args.passengers + 1):
-        rows['passenger'].append((i, f'Demo{i}', 'Passenger', None if i % 3 else 'Example', date(1970 + i % 40, 1 + i % 12, 1 + i % 27), f'DEMO-DOCUMENT-{i}', 'Testland'))
+        rows['passenger'].append((i, *person(), f'УЧЕБНЫЙ-{i:08d}', rng.choices(COUNTRIES, weights=(65, 10, 10, 5, 5, 5))[0]))
 
     flights = []
     for plane_index, (plane_id, pilot, home) in enumerate(planes):
@@ -239,6 +281,7 @@ def generate(args):
             scenarios[scenario] += 1
             if scenario == 'planned':
                 status = 2
+                occupied_runways.add(flight['takeoff_line_id'])
                 add_event(plane_id, current, snapshot - timedelta(minutes=20), f'Ready to takeoff; demo mechanic {mechanics[current]}')
                 continue
 
@@ -251,6 +294,10 @@ def generate(args):
                 current = destination
                 rows['landing'].append((len(rows['landing']) + 1, flight_id, rng.choice(runways[destination]), actual_end))
                 add_event(plane_id, destination, actual_end, f'Waiting checking after flight {flight_id}; demo dispatcher')
+                if last:
+                    status = (4, 5, 6)[(plane_index // 4) % 3]
+                    if status != 6:
+                        add_event(plane_id, destination, actual_end + timedelta(minutes=10), f'{STATES[status - 1]}; mechanic {mechanics[destination]}')
             else:
                 ground = False
                 status = 3 if scenario == 'approaching' else 1
@@ -268,6 +315,7 @@ def generate(args):
             airport = rows['airport'][current - 1]
             rows['plane_positions'].append((len(rows['plane_positions']) + 1, plane_id, airport[1], airport[2], airport[3], 0, 0, 0, snapshot))
 
+    rows['line'] = [(*row[:2], row[0] not in occupied_runways, *row[3:]) for row in rows['line']]
     bookings = {i: [] for i in range(1, args.passengers)}
     responsibilities = []
     flights.sort(key=lambda flight: flight['actual_takeoff_time'] or flight['planned_takeoff_time'])
