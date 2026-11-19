@@ -1,3 +1,22 @@
+/*
+Первый запрос должен предоставлять статистику эксплуатации самолётов.
+Отчёт должен содержать информацию о каждом самолёте, его типе, аэропорте базирования, общем количестве выполненных рейсов, суммарном времени нахождения в полёте, средней продолжительности рейса, дате последнего вылёта и текущем техническом состоянии.
+
+Второй запрос предназначен для анализа загрузки авиадиспетчеров.
+В отчёте необходимо отразить ФИО диспетчера, аэропорт, количество самолётов под его ответственностью, общее число назначений за выбранный период, среднее время сопровождения самолёта, дату последнего назначения, а также относительную загрузку диспетчера по сравнению со средним значением по аэропорту.
+
+Третий запрос должен анализировать использование взлётно-посадочных полос.
+Отчёт формируется по каждой полосе и включает количество выполненных взлётов и посадок, среднее время занятости полосы, максимальное время непрерывного использования, а также дату и время последнего применения полосы.
+
+Четвёртый запрос предназначен для анализа отклонений от планового расписания рейсов.
+В отчёте необходимо отразить плановые и фактические времена вылета и прилёта, величину отклонений в минутах, аэропорты вылета и назначения, а также итоговый статус рейса.
+
+Пятый запрос формирует статистику работы механиков.
+Отчёт должен содержать информацию о количестве проведённых проверок, числе самолётов, признанных исправными и неисправными, проценте критических неисправностей, среднем времени проверки и дате последней выполненной проверки.
+*/
+
+
+
 WITH completed_flights AS (
     SELECT f.airplane_id,
         COUNT(f.actual_land_time) AS completed_count,
@@ -126,3 +145,67 @@ JOIN airport AS a ON a.airport_id = l.airport_id
 LEFT JOIN event_totals AS e ON e.line_id = l.line_id
 ORDER BY a.name, l.line_id;
 
+WITH departure_deviations AS (
+    SELECT flight_id,
+           EXTRACT(EPOCH FROM (actual_takeoff_time - planned_takeoff_time)) / 60 AS deviation_minutes,
+           LAG(EXTRACT(EPOCH FROM (actual_takeoff_time - planned_takeoff_time)) / 60)
+               OVER (PARTITION BY airplane_id ORDER BY actual_takeoff_time, flight_id)
+               AS previous_deviation_minutes
+    FROM flight
+    WHERE actual_takeoff_time IS NOT NULL
+)
+SELECT f.flight_id, origin.name AS departure_airport, NULL::text AS destination_airport,
+       destination.name AS actual_landing_airport,
+       f.planned_takeoff_time, f.actual_takeoff_time,
+       ROUND(d.deviation_minutes, 2) AS departure_deviation_minutes,
+       ROUND(d.previous_deviation_minutes, 2) AS previous_departure_deviation_minutes,
+       ROUND(d.deviation_minutes - d.previous_deviation_minutes, 2) AS deviation_change_minutes,
+       f.planned_land_time, f.actual_land_time,
+       ROUND(EXTRACT(EPOCH FROM (f.actual_land_time - f.planned_land_time)) / 60, 2)
+           AS arrival_deviation_minutes,
+       CASE
+           WHEN f.actual_land_time IS NOT NULL THEN 'Завершён'
+           WHEN f.actual_takeoff_time IS NOT NULL THEN 'Вылетел'
+           ELSE 'Вылет не зафиксирован'
+       END AS flight_status
+FROM flight AS f
+LEFT JOIN departure_deviations AS d ON d.flight_id = f.flight_id
+JOIN line AS takeoff_line ON takeoff_line.line_id = f.takeoff_line_id
+JOIN airport AS origin ON origin.airport_id = takeoff_line.airport_id
+LEFT JOIN LATERAL (
+    SELECT l.line_id
+    FROM landing AS l
+    WHERE l.flight_id = f.flight_id AND l.landing_time = f.actual_land_time
+    ORDER BY l.landing_id DESC
+    LIMIT 1
+) AS actual_landing ON TRUE
+LEFT JOIN line AS landing_line ON landing_line.line_id = actual_landing.line_id
+LEFT JOIN airport AS destination ON destination.airport_id = landing_line.airport_id
+ORDER BY f.planned_takeoff_time, f.flight_id;
+
+WITH mechanic_mentions AS (
+    SELECT j.journal_id, j.action_time,
+           SUBSTRING(j.action_description FROM '; (?:demo )?mechanic ([0-9]+)$') AS mechanic_id
+    FROM journal AS j
+    JOIN airplane AS a ON a.airplane_id = j.object_id
+),
+mechanic_stats AS (
+    SELECT e.employee_id, CONCAT_WS(' ', e.lastname, e.firstname, e.middle_name) AS full_name,
+           e.working_place AS airport,
+           NULL::bigint AS inspection_count,
+           NULL::bigint AS serviceable_airplanes,
+           NULL::bigint AS unserviceable_airplanes,
+           NULL::numeric AS critical_defect_pct,
+           NULL::interval AS avg_inspection_time,
+           NULL::timestamptz AS last_inspection_at,
+           COUNT(j.journal_id) AS journal_mention_count,
+           MAX(j.action_time) AS last_journal_mention_at
+    FROM employee AS e
+    JOIN employee_position AS p ON p.position_id = e.position_id
+    LEFT JOIN mechanic_mentions AS j ON j.mechanic_id = e.employee_id::text
+    WHERE p.name = 'mechanic'
+    GROUP BY e.employee_id
+)
+SELECT m.*, DENSE_RANK() OVER (ORDER BY journal_mention_count DESC) AS journal_mention_rank
+FROM mechanic_stats AS m
+ORDER BY journal_mention_rank, employee_id;
