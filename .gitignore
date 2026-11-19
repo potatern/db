@@ -1,4 +1,6 @@
 *.drawio
 *.md
 
+./test/*
+
 verify*
