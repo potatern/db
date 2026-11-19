@@ -46,16 +46,18 @@ STATES = (
     'broken', 'checking', 'waiting checking',
 )
 COLUMNS = {
+    'runway_usage': 'usage_id,line_id,flight_id,operation_type,assigned_at,occupied_at,released_at',
+    'aircraft_inspection': 'inspection_id,airplane_id,mechanic_id,started_at,finished_at,result',
     'airport': 'airport_id,latitude,longitude,altitude,airspace_radius,city,country,name',
     'employee_position': 'position_id,name,duties',
     'hangar': 'hangar_number,airport_id,width,length,height,latitude,longitude',
     'journaling_object': 'object_id,object_type',
     'journal': 'journal_id,airport_id,object_id,action_time,action_description',
     'flight_status': 'status_id,status',
-    'airplane': 'airplane_id,airport_id,hangar_number,status_id,width,length,height',
+    'airplane': 'airplane_id,airport_id,hangar_number,status_id,width,length,height,base_airport_id,aircraft_type',
     'employee': 'employee_id,position_id,firstname,lastname,middle_name,birthdate,working_place,contract_information',
     'line': 'line_id,airport_id,is_free,latitude,longitude,altitude,width,length,direction',
-    'flight': 'flight_id,airplane_id,employee_id,takeoff_line_id,planned_takeoff_time,actual_takeoff_time,planned_land_time,actual_land_time',
+    'flight': 'flight_id,airplane_id,employee_id,takeoff_line_id,planned_takeoff_time,actual_takeoff_time,planned_land_time,actual_land_time,destination_airport_id',
     'passenger': 'passenger_id,firstname,lastname,middle_name,birthdate,passport_data,country',
     'boarding_pass': 'ticket_id,passenger_id,flight_id,seat,class,gate',
     'landing': 'landing_id,flight_id,line_id,landing_time',
@@ -63,6 +65,7 @@ COLUMNS = {
     'plane_positions': 'position_id,airplane_id,latitude,longitude,altitude,pitch,direction,speed,time_utc',
 }
 IDENTITY = {
+    'runway_usage': 'usage_id', 'aircraft_inspection': 'inspection_id',
     'airport': 'airport_id', 'employee_position': 'position_id',
     'journaling_object': 'object_id', 'journal': 'journal_id',
     'flight': 'flight_id', 'passenger': 'passenger_id',
@@ -273,15 +276,26 @@ def generate(args):
                 'actual_land_time': actual_end,
                 'origin': current,
                 'destination': destination,
+                'destination_airport_id': destination,
                 'duration': duration,
                 'scenario': scenario,
             }
             rows['flight'].append(tuple(flight[column] for column in COLUMNS['flight'].split(',')))
             flights.append(flight)
             scenarios[scenario] += 1
+            if actual_start is not None:
+                occupied_at = actual_start - timedelta(minutes=1 + flight_id % 3)
+                rows['runway_usage'].append((
+                    len(rows['runway_usage']) + 1, flight['takeoff_line_id'], flight_id, 'takeoff',
+                    occupied_at - timedelta(minutes=2), occupied_at, actual_start + timedelta(seconds=30),
+                ))
             if scenario == 'planned':
                 status = 2
                 occupied_runways.add(flight['takeoff_line_id'])
+                rows['runway_usage'].append((
+                    len(rows['runway_usage']) + 1, flight['takeoff_line_id'], flight_id, 'takeoff',
+                    snapshot - timedelta(minutes=20), snapshot - timedelta(minutes=1), None,
+                ))
                 add_event(plane_id, current, snapshot - timedelta(minutes=20), f'Ready to takeoff; demo mechanic {mechanics[current]}')
                 continue
 
@@ -292,12 +306,28 @@ def generate(args):
             if actual_end:
                 status = 6
                 current = destination
-                rows['landing'].append((len(rows['landing']) + 1, flight_id, rng.choice(runways[destination]), actual_end))
+                landing_line = rng.choice(runways[destination])
+                rows['landing'].append((len(rows['landing']) + 1, flight_id, landing_line, actual_end))
+                rows['runway_usage'].append((
+                    len(rows['runway_usage']) + 1, landing_line, flight_id, 'landing',
+                    actual_end - timedelta(minutes=4), actual_end - timedelta(seconds=30),
+                    actual_end + timedelta(seconds=30 + 15 * (flight_id % 4)),
+                ))
                 add_event(plane_id, destination, actual_end, f'Waiting checking after flight {flight_id}; demo dispatcher')
                 if last:
                     status = (4, 5, 6)[(plane_index // 4) % 3]
                     if status != 6:
                         add_event(plane_id, destination, actual_end + timedelta(minutes=10), f'{STATES[status - 1]}; mechanic {mechanics[destination]}')
+                if not last or status in (4, 5):
+                    started_at = actual_end + timedelta(minutes=5)
+                    finished_at = None if last and status == 5 else started_at + timedelta(minutes=10 + flight_id % 20)
+                    result = None if finished_at is None else (
+                        'critical_defect' if status == 4 else 'serviceable'
+                    )
+                    rows['aircraft_inspection'].append((
+                        len(rows['aircraft_inspection']) + 1, plane_id, mechanics[destination],
+                        started_at, finished_at, result,
+                    ))
             else:
                 ground = False
                 status = 3 if scenario == 'approaching' else 1
@@ -310,7 +340,7 @@ def generate(args):
         if not count:
             add_event(plane_id, current, snapshot, f'Current demonstration state: {STATES[status - 1]}')
         hangar = 1 + plane_index % 2 if ground and status != 2 else None
-        rows['airplane'].append((plane_id, current, hangar, status, round(rng.uniform(18, 35), 2), round(rng.uniform(22, 40), 2), round(rng.uniform(7, 12), 2)))
+        rows['airplane'].append((plane_id, current, hangar, status, round(rng.uniform(18, 35), 2), round(rng.uniform(22, 40), 2), round(rng.uniform(7, 12), 2), home, ('Turboprop', 'Regional jet')[plane_index % 2]))
         if ground:
             airport = rows['airport'][current - 1]
             rows['plane_positions'].append((len(rows['plane_positions']) + 1, plane_id, airport[1], airport[2], airport[3], 0, 0, 0, snapshot))
@@ -354,8 +384,7 @@ def generate(args):
         'rows': {table: len(data) for table, data in rows.items()},
         'scenarios': dict(sorted(scenarios.items())),
         'limitations': [
-            'No stored destination for flights without a landing record.',
-            'No structured inspection or state/runway assignment history.',
+            'Status changes are recorded as journal text.',
             'Geometric trajectories are not a flight dynamics simulation.',
             'The 30-second bound covers flight segments, not parked periods.',
         ],
@@ -364,6 +393,8 @@ def generate(args):
 
 
 REFERENCES = {
+    'base_airport_id': 'airport', 'destination_airport_id': 'airport',
+    'mechanic_id': 'journaling_object',
     'airport_id': 'airport',
     'object_id': 'journaling_object', 'airplane_id': 'journaling_object',
     'employee_id': 'journaling_object', 'status_id': 'journaling_object',
@@ -373,7 +404,8 @@ REFERENCES = {
 }
 ORDER = ['airport', 'employee_position', 'hangar', 'journaling_object', 'journal',
          'flight_status', 'airplane', 'employee', 'line', 'flight', 'passenger',
-         'boarding_pass', 'landing', 'airplane_master', 'plane_positions']
+         'boarding_pass', 'landing', 'airplane_master', 'plane_positions',
+         'runway_usage', 'aircraft_inspection']
 
 
 def write_sql(handle, rows, metadata):

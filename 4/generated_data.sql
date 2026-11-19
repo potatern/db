@@ -9,7 +9,7 @@ DECLARE
     flight_ids bigint[];
     passenger_ids bigint[];
 BEGIN
-    LOCK TABLE airport, employee_position, hangar, journaling_object, journal, flight_status, airplane, employee, line, flight, passenger, boarding_pass, landing, airplane_master, plane_positions IN EXCLUSIVE MODE;
+    LOCK TABLE airport, employee_position, hangar, journaling_object, journal, flight_status, airplane, employee, line, flight, passenger, boarding_pass, landing, airplane_master, plane_positions, runway_usage, aircraft_inspection IN EXCLUSIVE MODE;
     IF EXISTS (SELECT 1 FROM airport) THEN
         RAISE EXCEPTION 'Table must be empty: airport';
     END IF;
@@ -54,6 +54,12 @@ BEGIN
     END IF;
     IF EXISTS (SELECT 1 FROM plane_positions) THEN
         RAISE EXCEPTION 'Table must be empty: plane_positions';
+    END IF;
+    IF EXISTS (SELECT 1 FROM runway_usage) THEN
+        RAISE EXCEPTION 'Table must be empty: runway_usage';
+    END IF;
+    IF EXISTS (SELECT 1 FROM aircraft_inspection) THEN
+        RAISE EXCEPTION 'Table must be empty: aircraft_inspection';
     END IF;
 
     INSERT INTO airport (latitude, longitude, altitude, airspace_radius, city, country, name) VALUES
@@ -11021,43 +11027,43 @@ BEGIN
         (journaling_object_ids[5], 'checking'),
         (journaling_object_ids[6], 'waiting checking');
 
-    INSERT INTO airplane (airplane_id, airport_id, hangar_number, status_id, width, length, height) VALUES
-        (journaling_object_ids[52], airport_ids[1], 1, journaling_object_ids[4], 24.56, 37.68, 8.04),
-        (journaling_object_ids[54], airport_ids[1], NULL, journaling_object_ids[1], 31.71, 24.02, 11.75),
-        (journaling_object_ids[56], airport_ids[4], NULL, journaling_object_ids[3], 26.11, 38.66, 10.12),
-        (journaling_object_ids[58], airport_ids[8], NULL, journaling_object_ids[2], 28.52, 27.52, 10.86),
-        (journaling_object_ids[60], airport_ids[5], 1, journaling_object_ids[5], 31.27, 27.37, 9.89),
-        (journaling_object_ids[62], airport_ids[7], NULL, journaling_object_ids[1], 31.77, 34.45, 8.54),
-        (journaling_object_ids[64], airport_ids[4], NULL, journaling_object_ids[3], 20.46, 34.97, 9.05),
-        (journaling_object_ids[66], airport_ids[3], NULL, journaling_object_ids[2], 30.56, 29.42, 10.33),
-        (journaling_object_ids[68], airport_ids[5], 1, journaling_object_ids[6], 30.32, 31.87, 11.57),
-        (journaling_object_ids[70], airport_ids[4], NULL, journaling_object_ids[1], 23.23, 27.41, 10.77),
-        (journaling_object_ids[72], airport_ids[8], NULL, journaling_object_ids[3], 23.63, 38.39, 10.97),
-        (journaling_object_ids[74], airport_ids[7], NULL, journaling_object_ids[2], 30.82, 31.26, 11.82),
-        (journaling_object_ids[76], airport_ids[9], 1, journaling_object_ids[4], 22.09, 34.06, 10.14),
-        (journaling_object_ids[78], airport_ids[5], NULL, journaling_object_ids[1], 20.13, 38.58, 8.8),
-        (journaling_object_ids[80], airport_ids[4], NULL, journaling_object_ids[3], 19.31, 23.09, 10.79),
-        (journaling_object_ids[82], airport_ids[1], NULL, journaling_object_ids[2], 32.95, 34.08, 9.68),
-        (journaling_object_ids[84], airport_ids[1], 1, journaling_object_ids[5], 23.89, 36.33, 8.54),
-        (journaling_object_ids[86], airport_ids[2], NULL, journaling_object_ids[1], 31.58, 24.95, 11.34),
-        (journaling_object_ids[88], airport_ids[2], NULL, journaling_object_ids[3], 24.65, 24.13, 10.29),
-        (journaling_object_ids[90], airport_ids[3], NULL, journaling_object_ids[2], 33.34, 24.7, 9.07),
-        (journaling_object_ids[92], airport_ids[6], 1, journaling_object_ids[6], 28.22, 39.93, 7.28),
-        (journaling_object_ids[94], airport_ids[3], NULL, journaling_object_ids[1], 19.67, 31.5, 9.21),
-        (journaling_object_ids[96], airport_ids[8], NULL, journaling_object_ids[3], 27.65, 29.35, 11.06),
-        (journaling_object_ids[98], airport_ids[3], NULL, journaling_object_ids[2], 22.82, 33.52, 10.18),
-        (journaling_object_ids[100], airport_ids[8], 1, journaling_object_ids[4], 22.22, 25.84, 10.75),
-        (journaling_object_ids[102], airport_ids[5], NULL, journaling_object_ids[1], 29.96, 39.6, 7.66),
-        (journaling_object_ids[104], airport_ids[4], NULL, journaling_object_ids[3], 27.48, 30.85, 8.06),
-        (journaling_object_ids[106], airport_ids[8], NULL, journaling_object_ids[2], 30.68, 25.09, 7.72),
-        (journaling_object_ids[108], airport_ids[1], 1, journaling_object_ids[5], 31.38, 25.37, 9.29),
-        (journaling_object_ids[110], airport_ids[1], NULL, journaling_object_ids[1], 18.83, 37.96, 11.38),
-        (journaling_object_ids[112], airport_ids[1], NULL, journaling_object_ids[3], 21.44, 25.43, 8.2),
-        (journaling_object_ids[114], airport_ids[8], NULL, journaling_object_ids[2], 30.32, 36.79, 9.75),
-        (journaling_object_ids[116], airport_ids[6], 1, journaling_object_ids[6], 20.23, 29.4, 8.06),
-        (journaling_object_ids[118], airport_ids[4], NULL, journaling_object_ids[1], 31.92, 30.82, 10.95),
-        (journaling_object_ids[120], airport_ids[6], NULL, journaling_object_ids[3], 29.86, 30.19, 10.63),
-        (journaling_object_ids[122], airport_ids[7], NULL, journaling_object_ids[2], 31.9, 39.46, 11.9);
+    INSERT INTO airplane (airplane_id, airport_id, hangar_number, status_id, width, length, height, base_airport_id, aircraft_type) VALUES
+        (journaling_object_ids[52], airport_ids[1], 1, journaling_object_ids[4], 24.56, 37.68, 8.04, airport_ids[1], 'Turboprop'),
+        (journaling_object_ids[54], airport_ids[1], NULL, journaling_object_ids[1], 31.71, 24.02, 11.75, airport_ids[2], 'Regional jet'),
+        (journaling_object_ids[56], airport_ids[4], NULL, journaling_object_ids[3], 26.11, 38.66, 10.12, airport_ids[3], 'Turboprop'),
+        (journaling_object_ids[58], airport_ids[8], NULL, journaling_object_ids[2], 28.52, 27.52, 10.86, airport_ids[4], 'Regional jet'),
+        (journaling_object_ids[60], airport_ids[5], 1, journaling_object_ids[5], 31.27, 27.37, 9.89, airport_ids[5], 'Turboprop'),
+        (journaling_object_ids[62], airport_ids[7], NULL, journaling_object_ids[1], 31.77, 34.45, 8.54, airport_ids[6], 'Regional jet'),
+        (journaling_object_ids[64], airport_ids[4], NULL, journaling_object_ids[3], 20.46, 34.97, 9.05, airport_ids[7], 'Turboprop'),
+        (journaling_object_ids[66], airport_ids[3], NULL, journaling_object_ids[2], 30.56, 29.42, 10.33, airport_ids[8], 'Regional jet'),
+        (journaling_object_ids[68], airport_ids[5], 1, journaling_object_ids[6], 30.32, 31.87, 11.57, airport_ids[9], 'Turboprop'),
+        (journaling_object_ids[70], airport_ids[4], NULL, journaling_object_ids[1], 23.23, 27.41, 10.77, airport_ids[1], 'Regional jet'),
+        (journaling_object_ids[72], airport_ids[8], NULL, journaling_object_ids[3], 23.63, 38.39, 10.97, airport_ids[2], 'Turboprop'),
+        (journaling_object_ids[74], airport_ids[7], NULL, journaling_object_ids[2], 30.82, 31.26, 11.82, airport_ids[3], 'Regional jet'),
+        (journaling_object_ids[76], airport_ids[9], 1, journaling_object_ids[4], 22.09, 34.06, 10.14, airport_ids[4], 'Turboprop'),
+        (journaling_object_ids[78], airport_ids[5], NULL, journaling_object_ids[1], 20.13, 38.58, 8.8, airport_ids[5], 'Regional jet'),
+        (journaling_object_ids[80], airport_ids[4], NULL, journaling_object_ids[3], 19.31, 23.09, 10.79, airport_ids[6], 'Turboprop'),
+        (journaling_object_ids[82], airport_ids[1], NULL, journaling_object_ids[2], 32.95, 34.08, 9.68, airport_ids[7], 'Regional jet'),
+        (journaling_object_ids[84], airport_ids[1], 1, journaling_object_ids[5], 23.89, 36.33, 8.54, airport_ids[8], 'Turboprop'),
+        (journaling_object_ids[86], airport_ids[2], NULL, journaling_object_ids[1], 31.58, 24.95, 11.34, airport_ids[9], 'Regional jet'),
+        (journaling_object_ids[88], airport_ids[2], NULL, journaling_object_ids[3], 24.65, 24.13, 10.29, airport_ids[1], 'Turboprop'),
+        (journaling_object_ids[90], airport_ids[3], NULL, journaling_object_ids[2], 33.34, 24.7, 9.07, airport_ids[2], 'Regional jet'),
+        (journaling_object_ids[92], airport_ids[6], 1, journaling_object_ids[6], 28.22, 39.93, 7.28, airport_ids[3], 'Turboprop'),
+        (journaling_object_ids[94], airport_ids[3], NULL, journaling_object_ids[1], 19.67, 31.5, 9.21, airport_ids[4], 'Regional jet'),
+        (journaling_object_ids[96], airport_ids[8], NULL, journaling_object_ids[3], 27.65, 29.35, 11.06, airport_ids[5], 'Turboprop'),
+        (journaling_object_ids[98], airport_ids[3], NULL, journaling_object_ids[2], 22.82, 33.52, 10.18, airport_ids[6], 'Regional jet'),
+        (journaling_object_ids[100], airport_ids[8], 1, journaling_object_ids[4], 22.22, 25.84, 10.75, airport_ids[7], 'Turboprop'),
+        (journaling_object_ids[102], airport_ids[5], NULL, journaling_object_ids[1], 29.96, 39.6, 7.66, airport_ids[8], 'Regional jet'),
+        (journaling_object_ids[104], airport_ids[4], NULL, journaling_object_ids[3], 27.48, 30.85, 8.06, airport_ids[9], 'Turboprop'),
+        (journaling_object_ids[106], airport_ids[8], NULL, journaling_object_ids[2], 30.68, 25.09, 7.72, airport_ids[1], 'Regional jet'),
+        (journaling_object_ids[108], airport_ids[1], 1, journaling_object_ids[5], 31.38, 25.37, 9.29, airport_ids[2], 'Turboprop'),
+        (journaling_object_ids[110], airport_ids[1], NULL, journaling_object_ids[1], 18.83, 37.96, 11.38, airport_ids[3], 'Regional jet'),
+        (journaling_object_ids[112], airport_ids[1], NULL, journaling_object_ids[3], 21.44, 25.43, 8.2, airport_ids[4], 'Turboprop'),
+        (journaling_object_ids[114], airport_ids[8], NULL, journaling_object_ids[2], 30.32, 36.79, 9.75, airport_ids[5], 'Regional jet'),
+        (journaling_object_ids[116], airport_ids[6], 1, journaling_object_ids[6], 20.23, 29.4, 8.06, airport_ids[6], 'Turboprop'),
+        (journaling_object_ids[118], airport_ids[4], NULL, journaling_object_ids[1], 31.92, 30.82, 10.95, airport_ids[7], 'Regional jet'),
+        (journaling_object_ids[120], airport_ids[6], NULL, journaling_object_ids[3], 29.86, 30.19, 10.63, airport_ids[8], 'Turboprop'),
+        (journaling_object_ids[122], airport_ids[7], NULL, journaling_object_ids[2], 31.9, 39.46, 11.9, airport_ids[9], 'Regional jet');
 
     INSERT INTO employee (employee_id, position_id, firstname, lastname, middle_name, birthdate, working_place, contract_information) VALUES
         (journaling_object_ids[7], employee_position_ids[2], 'Зоя', 'Сухарик', NULL, '1978-08-14'::date, 'Москва — Ещё кружочек №1', 'ТРУД-000007'),
@@ -11144,1204 +11150,1204 @@ BEGIN
         (journaling_object_ids[50], airport_ids[9], true, 57.7242317, 40.8715115, 132.52, 45, 2500, 90),
         (journaling_object_ids[51], airport_ids[9], true, 57.7242317, 40.8715115, 132.52, 45, 2500, 270);
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[10], '2026-01-01 06:00:00+00:00'::timestamptz, '2026-01-01 06:08:00+00:00'::timestamptz, '2026-01-01 06:49:00+00:00'::timestamptz, '2026-01-01 06:58:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[10], '2026-01-01 06:00:00+00:00'::timestamptz, '2026-01-01 06:08:00+00:00'::timestamptz, '2026-01-01 06:49:00+00:00'::timestamptz, '2026-01-01 06:58:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[1] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[21], '2026-01-02 06:00:00+00:00'::timestamptz, '2026-01-02 06:04:00+00:00'::timestamptz, '2026-01-02 06:39:00+00:00'::timestamptz, '2026-01-02 06:42:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[21], '2026-01-02 06:00:00+00:00'::timestamptz, '2026-01-02 06:04:00+00:00'::timestamptz, '2026-01-02 06:39:00+00:00'::timestamptz, '2026-01-02 06:42:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[2] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[10], '2026-01-03 06:00:00+00:00'::timestamptz, '2026-01-03 06:08:00+00:00'::timestamptz, '2026-01-03 06:47:00+00:00'::timestamptz, '2026-01-03 06:52:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[10], '2026-01-03 06:00:00+00:00'::timestamptz, '2026-01-03 06:08:00+00:00'::timestamptz, '2026-01-03 06:47:00+00:00'::timestamptz, '2026-01-03 06:52:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[3] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[35], '2026-01-04 06:00:00+00:00'::timestamptz, '2026-01-04 06:09:00+00:00'::timestamptz, '2026-01-04 06:40:00+00:00'::timestamptz, '2026-01-04 06:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[35], '2026-01-04 06:00:00+00:00'::timestamptz, '2026-01-04 06:09:00+00:00'::timestamptz, '2026-01-04 06:40:00+00:00'::timestamptz, '2026-01-04 06:50:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[4] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[31], '2026-01-05 06:00:00+00:00'::timestamptz, '2026-01-05 06:09:00+00:00'::timestamptz, '2026-01-05 06:45:00+00:00'::timestamptz, '2026-01-05 06:52:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[31], '2026-01-05 06:00:00+00:00'::timestamptz, '2026-01-05 06:09:00+00:00'::timestamptz, '2026-01-05 06:45:00+00:00'::timestamptz, '2026-01-05 06:52:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[5] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[25], '2026-01-06 06:00:00+00:00'::timestamptz, '2026-01-06 06:09:00+00:00'::timestamptz, '2026-01-06 06:25:00+00:00'::timestamptz, '2026-01-06 06:35:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[25], '2026-01-06 06:00:00+00:00'::timestamptz, '2026-01-06 06:09:00+00:00'::timestamptz, '2026-01-06 06:25:00+00:00'::timestamptz, '2026-01-06 06:35:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[6] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[15], '2026-01-07 06:00:00+00:00'::timestamptz, '2026-01-07 06:13:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, '2026-01-07 07:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[15], '2026-01-07 06:00:00+00:00'::timestamptz, '2026-01-07 06:13:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, '2026-01-07 07:07:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[7] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[11], '2026-01-08 06:00:00+00:00'::timestamptz, '2026-01-08 06:14:00+00:00'::timestamptz, '2026-01-08 06:50:00+00:00'::timestamptz, '2026-01-08 07:01:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[11], '2026-01-08 06:00:00+00:00'::timestamptz, '2026-01-08 06:14:00+00:00'::timestamptz, '2026-01-08 06:50:00+00:00'::timestamptz, '2026-01-08 07:01:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[8] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[36], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:34:00+00:00'::timestamptz, '2026-01-12 10:32:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[52], journaling_object_ids[53], journaling_object_ids[36], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:34:00+00:00'::timestamptz, '2026-01-12 10:32:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[9] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[15], '2026-01-01 06:10:00+00:00'::timestamptz, '2026-01-01 06:21:00+00:00'::timestamptz, '2026-01-01 06:41:00+00:00'::timestamptz, '2026-01-01 06:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[15], '2026-01-01 06:10:00+00:00'::timestamptz, '2026-01-01 06:21:00+00:00'::timestamptz, '2026-01-01 06:41:00+00:00'::timestamptz, '2026-01-01 06:49:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[10] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[45], '2026-01-02 06:10:00+00:00'::timestamptz, '2026-01-02 06:07:00+00:00'::timestamptz, '2026-01-02 06:57:00+00:00'::timestamptz, '2026-01-02 06:54:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[45], '2026-01-02 06:10:00+00:00'::timestamptz, '2026-01-02 06:07:00+00:00'::timestamptz, '2026-01-02 06:57:00+00:00'::timestamptz, '2026-01-02 06:54:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[11] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[41], '2026-01-03 06:10:00+00:00'::timestamptz, '2026-01-03 06:24:00+00:00'::timestamptz, '2026-01-03 07:00:00+00:00'::timestamptz, '2026-01-03 07:15:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[41], '2026-01-03 06:10:00+00:00'::timestamptz, '2026-01-03 06:24:00+00:00'::timestamptz, '2026-01-03 07:00:00+00:00'::timestamptz, '2026-01-03 07:15:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[12] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[10], '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:14:00+00:00'::timestamptz, '2026-01-04 06:48:00+00:00'::timestamptz, '2026-01-04 06:55:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[10], '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:14:00+00:00'::timestamptz, '2026-01-04 06:48:00+00:00'::timestamptz, '2026-01-04 06:55:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[13] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[35], '2026-01-05 06:10:00+00:00'::timestamptz, '2026-01-05 06:15:00+00:00'::timestamptz, '2026-01-05 06:41:00+00:00'::timestamptz, '2026-01-05 06:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[35], '2026-01-05 06:10:00+00:00'::timestamptz, '2026-01-05 06:15:00+00:00'::timestamptz, '2026-01-05 06:41:00+00:00'::timestamptz, '2026-01-05 06:49:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[14] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[16], '2026-01-06 06:10:00+00:00'::timestamptz, '2026-01-06 06:18:00+00:00'::timestamptz, '2026-01-06 06:48:00+00:00'::timestamptz, '2026-01-06 06:54:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[16], '2026-01-06 06:10:00+00:00'::timestamptz, '2026-01-06 06:18:00+00:00'::timestamptz, '2026-01-06 06:48:00+00:00'::timestamptz, '2026-01-06 06:54:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[15] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[11], '2026-01-07 06:10:00+00:00'::timestamptz, '2026-01-07 06:10:00+00:00'::timestamptz, '2026-01-07 06:39:00+00:00'::timestamptz, '2026-01-07 06:40:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[11], '2026-01-07 06:10:00+00:00'::timestamptz, '2026-01-07 06:10:00+00:00'::timestamptz, '2026-01-07 06:39:00+00:00'::timestamptz, '2026-01-07 06:40:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[16] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[31], '2026-01-08 06:10:00+00:00'::timestamptz, '2026-01-08 06:23:00+00:00'::timestamptz, '2026-01-08 06:38:00+00:00'::timestamptz, '2026-01-08 06:48:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[31], '2026-01-08 06:10:00+00:00'::timestamptz, '2026-01-08 06:23:00+00:00'::timestamptz, '2026-01-08 06:38:00+00:00'::timestamptz, '2026-01-08 06:48:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[17] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[11], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:40:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[54], journaling_object_ids[55], journaling_object_ids[11], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:40:00+00:00'::timestamptz, NULL, airport_ids[9]);
     flight_ids[18] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[21], '2026-01-01 06:20:00+00:00'::timestamptz, '2026-01-01 06:27:00+00:00'::timestamptz, '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 07:06:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[21], '2026-01-01 06:20:00+00:00'::timestamptz, '2026-01-01 06:27:00+00:00'::timestamptz, '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 07:06:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[19] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[36], '2026-01-02 06:20:00+00:00'::timestamptz, '2026-01-02 06:34:00+00:00'::timestamptz, '2026-01-02 06:48:00+00:00'::timestamptz, '2026-01-02 07:03:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[36], '2026-01-02 06:20:00+00:00'::timestamptz, '2026-01-02 06:34:00+00:00'::timestamptz, '2026-01-02 06:48:00+00:00'::timestamptz, '2026-01-02 07:03:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[20] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[11], '2026-01-03 06:20:00+00:00'::timestamptz, '2026-01-03 06:17:00+00:00'::timestamptz, '2026-01-03 06:48:00+00:00'::timestamptz, '2026-01-03 06:46:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[11], '2026-01-03 06:20:00+00:00'::timestamptz, '2026-01-03 06:17:00+00:00'::timestamptz, '2026-01-03 06:48:00+00:00'::timestamptz, '2026-01-03 06:46:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[21] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[25], '2026-01-04 06:20:00+00:00'::timestamptz, '2026-01-04 06:32:00+00:00'::timestamptz, '2026-01-04 06:49:00+00:00'::timestamptz, '2026-01-04 07:01:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[25], '2026-01-04 06:20:00+00:00'::timestamptz, '2026-01-04 06:32:00+00:00'::timestamptz, '2026-01-04 06:49:00+00:00'::timestamptz, '2026-01-04 07:01:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[22] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[36], '2026-01-05 06:20:00+00:00'::timestamptz, '2026-01-05 06:32:00+00:00'::timestamptz, '2026-01-05 07:09:00+00:00'::timestamptz, '2026-01-05 07:18:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[36], '2026-01-05 06:20:00+00:00'::timestamptz, '2026-01-05 06:32:00+00:00'::timestamptz, '2026-01-05 07:09:00+00:00'::timestamptz, '2026-01-05 07:18:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[23] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[26], '2026-01-06 06:20:00+00:00'::timestamptz, '2026-01-06 06:35:00+00:00'::timestamptz, '2026-01-06 06:53:00+00:00'::timestamptz, '2026-01-06 07:06:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[26], '2026-01-06 06:20:00+00:00'::timestamptz, '2026-01-06 06:35:00+00:00'::timestamptz, '2026-01-06 06:53:00+00:00'::timestamptz, '2026-01-06 07:06:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[24] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[36], '2026-01-07 06:20:00+00:00'::timestamptz, '2026-01-07 06:35:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, '2026-01-07 07:11:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[36], '2026-01-07 06:20:00+00:00'::timestamptz, '2026-01-07 06:35:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, '2026-01-07 07:11:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[25] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[11], '2026-01-08 06:20:00+00:00'::timestamptz, '2026-01-08 06:33:00+00:00'::timestamptz, '2026-01-08 06:52:00+00:00'::timestamptz, '2026-01-08 07:04:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[11], '2026-01-08 06:20:00+00:00'::timestamptz, '2026-01-08 06:33:00+00:00'::timestamptz, '2026-01-08 06:52:00+00:00'::timestamptz, '2026-01-08 07:04:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[26] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[26], '2026-01-12 11:35:00+00:00'::timestamptz, '2026-01-12 11:35:00+00:00'::timestamptz, '2026-01-12 12:03:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[56], journaling_object_ids[57], journaling_object_ids[26], '2026-01-12 11:35:00+00:00'::timestamptz, '2026-01-12 11:35:00+00:00'::timestamptz, '2026-01-12 12:03:00+00:00'::timestamptz, NULL, airport_ids[9]);
     flight_ids[27] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[25], '2026-01-01 06:30:00+00:00'::timestamptz, '2026-01-01 06:44:00+00:00'::timestamptz, '2026-01-01 07:15:00+00:00'::timestamptz, '2026-01-01 07:28:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[25], '2026-01-01 06:30:00+00:00'::timestamptz, '2026-01-01 06:44:00+00:00'::timestamptz, '2026-01-01 07:15:00+00:00'::timestamptz, '2026-01-01 07:28:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[28] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[36], '2026-01-02 06:30:00+00:00'::timestamptz, '2026-01-02 06:29:00+00:00'::timestamptz, '2026-01-02 07:18:00+00:00'::timestamptz, '2026-01-02 07:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[36], '2026-01-02 06:30:00+00:00'::timestamptz, '2026-01-02 06:29:00+00:00'::timestamptz, '2026-01-02 07:18:00+00:00'::timestamptz, '2026-01-02 07:20:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[29] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[25], '2026-01-03 06:30:00+00:00'::timestamptz, '2026-01-03 06:34:00+00:00'::timestamptz, '2026-01-03 07:02:00+00:00'::timestamptz, '2026-01-03 07:05:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[25], '2026-01-03 06:30:00+00:00'::timestamptz, '2026-01-03 06:34:00+00:00'::timestamptz, '2026-01-03 07:02:00+00:00'::timestamptz, '2026-01-03 07:05:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[30] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[40], '2026-01-04 06:30:00+00:00'::timestamptz, '2026-01-04 06:35:00+00:00'::timestamptz, '2026-01-04 07:09:00+00:00'::timestamptz, '2026-01-04 07:14:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[40], '2026-01-04 06:30:00+00:00'::timestamptz, '2026-01-04 06:35:00+00:00'::timestamptz, '2026-01-04 07:09:00+00:00'::timestamptz, '2026-01-04 07:14:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[31] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[36], '2026-01-05 06:30:00+00:00'::timestamptz, '2026-01-05 06:36:00+00:00'::timestamptz, '2026-01-05 07:14:00+00:00'::timestamptz, '2026-01-05 07:17:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[36], '2026-01-05 06:30:00+00:00'::timestamptz, '2026-01-05 06:36:00+00:00'::timestamptz, '2026-01-05 07:14:00+00:00'::timestamptz, '2026-01-05 07:17:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[32] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[26], '2026-01-06 06:30:00+00:00'::timestamptz, '2026-01-06 06:45:00+00:00'::timestamptz, '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 07:35:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[26], '2026-01-06 06:30:00+00:00'::timestamptz, '2026-01-06 06:45:00+00:00'::timestamptz, '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 07:35:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[33] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[21], '2026-01-07 06:30:00+00:00'::timestamptz, '2026-01-07 06:36:00+00:00'::timestamptz, '2026-01-07 07:14:00+00:00'::timestamptz, '2026-01-07 07:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[21], '2026-01-07 06:30:00+00:00'::timestamptz, '2026-01-07 06:36:00+00:00'::timestamptz, '2026-01-07 07:14:00+00:00'::timestamptz, '2026-01-07 07:20:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[34] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[30], '2026-01-08 06:30:00+00:00'::timestamptz, '2026-01-08 06:33:00+00:00'::timestamptz, '2026-01-08 07:27:00+00:00'::timestamptz, '2026-01-08 07:27:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[30], '2026-01-08 06:30:00+00:00'::timestamptz, '2026-01-08 06:33:00+00:00'::timestamptz, '2026-01-08 07:27:00+00:00'::timestamptz, '2026-01-08 07:27:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[35] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[45], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:34:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[58], journaling_object_ids[59], journaling_object_ids[45], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:34:00+00:00'::timestamptz, NULL, airport_ids[2]);
     flight_ids[36] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[31], '2026-01-01 06:40:00+00:00'::timestamptz, '2026-01-01 06:51:00+00:00'::timestamptz, '2026-01-01 07:16:00+00:00'::timestamptz, '2026-01-01 07:26:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[31], '2026-01-01 06:40:00+00:00'::timestamptz, '2026-01-01 06:51:00+00:00'::timestamptz, '2026-01-01 07:16:00+00:00'::timestamptz, '2026-01-01 07:26:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[37] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[11], '2026-01-02 06:40:00+00:00'::timestamptz, '2026-01-02 06:44:00+00:00'::timestamptz, '2026-01-02 07:18:00+00:00'::timestamptz, '2026-01-02 07:21:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[11], '2026-01-02 06:40:00+00:00'::timestamptz, '2026-01-02 06:44:00+00:00'::timestamptz, '2026-01-02 07:18:00+00:00'::timestamptz, '2026-01-02 07:21:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[38] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[40], '2026-01-03 06:40:00+00:00'::timestamptz, '2026-01-03 06:54:00+00:00'::timestamptz, '2026-01-03 07:07:00+00:00'::timestamptz, '2026-01-03 07:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[40], '2026-01-03 06:40:00+00:00'::timestamptz, '2026-01-03 06:54:00+00:00'::timestamptz, '2026-01-03 07:07:00+00:00'::timestamptz, '2026-01-03 07:20:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[39] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[51], '2026-01-04 06:40:00+00:00'::timestamptz, '2026-01-04 06:37:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[51], '2026-01-04 06:40:00+00:00'::timestamptz, '2026-01-04 06:37:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[40] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[21], '2026-01-05 06:40:00+00:00'::timestamptz, '2026-01-05 06:43:00+00:00'::timestamptz, '2026-01-05 07:19:00+00:00'::timestamptz, '2026-01-05 07:19:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[21], '2026-01-05 06:40:00+00:00'::timestamptz, '2026-01-05 06:43:00+00:00'::timestamptz, '2026-01-05 07:19:00+00:00'::timestamptz, '2026-01-05 07:19:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[41] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[35], '2026-01-06 06:40:00+00:00'::timestamptz, '2026-01-06 06:48:00+00:00'::timestamptz, '2026-01-06 07:08:00+00:00'::timestamptz, '2026-01-06 07:16:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[35], '2026-01-06 06:40:00+00:00'::timestamptz, '2026-01-06 06:48:00+00:00'::timestamptz, '2026-01-06 07:08:00+00:00'::timestamptz, '2026-01-06 07:16:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[42] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[41], '2026-01-07 06:40:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, '2026-01-07 07:16:00+00:00'::timestamptz, '2026-01-07 07:29:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[41], '2026-01-07 06:40:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, '2026-01-07 07:16:00+00:00'::timestamptz, '2026-01-07 07:29:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[43] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[15], '2026-01-08 06:40:00+00:00'::timestamptz, '2026-01-08 06:38:00+00:00'::timestamptz, '2026-01-08 07:28:00+00:00'::timestamptz, '2026-01-08 07:27:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[15], '2026-01-08 06:40:00+00:00'::timestamptz, '2026-01-08 06:38:00+00:00'::timestamptz, '2026-01-08 07:28:00+00:00'::timestamptz, '2026-01-08 07:27:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[44] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[10], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:50:00+00:00'::timestamptz, '2026-01-12 10:47:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[60], journaling_object_ids[61], journaling_object_ids[10], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:50:00+00:00'::timestamptz, '2026-01-12 10:47:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[45] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[36], '2026-01-01 06:50:00+00:00'::timestamptz, '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 07:39:00+00:00'::timestamptz, '2026-01-01 07:51:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[36], '2026-01-01 06:50:00+00:00'::timestamptz, '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 07:39:00+00:00'::timestamptz, '2026-01-01 07:51:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[46] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[46], '2026-01-02 06:50:00+00:00'::timestamptz, '2026-01-02 06:47:00+00:00'::timestamptz, '2026-01-02 07:34:00+00:00'::timestamptz, '2026-01-02 07:30:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[46], '2026-01-02 06:50:00+00:00'::timestamptz, '2026-01-02 06:47:00+00:00'::timestamptz, '2026-01-02 07:34:00+00:00'::timestamptz, '2026-01-02 07:30:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[47] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[35], '2026-01-03 06:50:00+00:00'::timestamptz, '2026-01-03 06:59:00+00:00'::timestamptz, '2026-01-03 07:21:00+00:00'::timestamptz, '2026-01-03 07:27:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[35], '2026-01-03 06:50:00+00:00'::timestamptz, '2026-01-03 06:59:00+00:00'::timestamptz, '2026-01-03 07:21:00+00:00'::timestamptz, '2026-01-03 07:27:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[48] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[10], '2026-01-04 06:50:00+00:00'::timestamptz, '2026-01-04 06:55:00+00:00'::timestamptz, '2026-01-04 07:35:00+00:00'::timestamptz, '2026-01-04 07:39:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[10], '2026-01-04 06:50:00+00:00'::timestamptz, '2026-01-04 06:55:00+00:00'::timestamptz, '2026-01-04 07:35:00+00:00'::timestamptz, '2026-01-04 07:39:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[49] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[21], '2026-01-05 06:50:00+00:00'::timestamptz, '2026-01-05 07:04:00+00:00'::timestamptz, '2026-01-05 07:38:00+00:00'::timestamptz, '2026-01-05 07:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[21], '2026-01-05 06:50:00+00:00'::timestamptz, '2026-01-05 07:04:00+00:00'::timestamptz, '2026-01-05 07:38:00+00:00'::timestamptz, '2026-01-05 07:49:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[50] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[46], '2026-01-06 06:50:00+00:00'::timestamptz, '2026-01-06 06:58:00+00:00'::timestamptz, '2026-01-06 07:17:00+00:00'::timestamptz, '2026-01-06 07:24:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[46], '2026-01-06 06:50:00+00:00'::timestamptz, '2026-01-06 06:58:00+00:00'::timestamptz, '2026-01-06 07:17:00+00:00'::timestamptz, '2026-01-06 07:24:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[51] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[50], '2026-01-07 06:50:00+00:00'::timestamptz, '2026-01-07 06:57:00+00:00'::timestamptz, '2026-01-07 07:37:00+00:00'::timestamptz, '2026-01-07 07:43:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[50], '2026-01-07 06:50:00+00:00'::timestamptz, '2026-01-07 06:57:00+00:00'::timestamptz, '2026-01-07 07:37:00+00:00'::timestamptz, '2026-01-07 07:43:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[52] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[10], '2026-01-08 06:50:00+00:00'::timestamptz, '2026-01-08 06:51:00+00:00'::timestamptz, '2026-01-08 07:37:00+00:00'::timestamptz, '2026-01-08 07:38:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[10], '2026-01-08 06:50:00+00:00'::timestamptz, '2026-01-08 06:51:00+00:00'::timestamptz, '2026-01-08 07:37:00+00:00'::timestamptz, '2026-01-08 07:38:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[53] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[41], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:43:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[62], journaling_object_ids[63], journaling_object_ids[41], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:43:00+00:00'::timestamptz, NULL, airport_ids[2]);
     flight_ids[54] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[41], '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 06:57:00+00:00'::timestamptz, '2026-01-01 07:56:00+00:00'::timestamptz, '2026-01-01 07:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[41], '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 06:57:00+00:00'::timestamptz, '2026-01-01 07:56:00+00:00'::timestamptz, '2026-01-01 07:50:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[55] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[36], '2026-01-02 07:00:00+00:00'::timestamptz, '2026-01-02 07:06:00+00:00'::timestamptz, '2026-01-02 07:40:00+00:00'::timestamptz, '2026-01-02 07:45:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[36], '2026-01-02 07:00:00+00:00'::timestamptz, '2026-01-02 07:06:00+00:00'::timestamptz, '2026-01-02 07:40:00+00:00'::timestamptz, '2026-01-02 07:45:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[56] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[15], '2026-01-03 07:00:00+00:00'::timestamptz, '2026-01-03 06:57:00+00:00'::timestamptz, '2026-01-03 07:36:00+00:00'::timestamptz, '2026-01-03 07:36:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[15], '2026-01-03 07:00:00+00:00'::timestamptz, '2026-01-03 06:57:00+00:00'::timestamptz, '2026-01-03 07:36:00+00:00'::timestamptz, '2026-01-03 07:36:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[57] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[20], '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 07:15:00+00:00'::timestamptz, '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:56:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[20], '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 07:15:00+00:00'::timestamptz, '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:56:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[58] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[41], '2026-01-05 07:00:00+00:00'::timestamptz, '2026-01-05 07:15:00+00:00'::timestamptz, '2026-01-05 07:37:00+00:00'::timestamptz, '2026-01-05 07:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[41], '2026-01-05 07:00:00+00:00'::timestamptz, '2026-01-05 07:15:00+00:00'::timestamptz, '2026-01-05 07:37:00+00:00'::timestamptz, '2026-01-05 07:50:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[59] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[10], '2026-01-06 07:00:00+00:00'::timestamptz, '2026-01-06 07:15:00+00:00'::timestamptz, '2026-01-06 07:32:00+00:00'::timestamptz, '2026-01-06 07:47:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[10], '2026-01-06 07:00:00+00:00'::timestamptz, '2026-01-06 07:15:00+00:00'::timestamptz, '2026-01-06 07:32:00+00:00'::timestamptz, '2026-01-06 07:47:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[60] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[26], '2026-01-07 07:00:00+00:00'::timestamptz, '2026-01-07 07:05:00+00:00'::timestamptz, '2026-01-07 07:44:00+00:00'::timestamptz, '2026-01-07 07:47:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[26], '2026-01-07 07:00:00+00:00'::timestamptz, '2026-01-07 07:05:00+00:00'::timestamptz, '2026-01-07 07:44:00+00:00'::timestamptz, '2026-01-07 07:47:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[61] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[10], '2026-01-08 07:00:00+00:00'::timestamptz, '2026-01-08 07:15:00+00:00'::timestamptz, '2026-01-08 07:28:00+00:00'::timestamptz, '2026-01-08 07:43:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[10], '2026-01-08 07:00:00+00:00'::timestamptz, '2026-01-08 07:15:00+00:00'::timestamptz, '2026-01-08 07:28:00+00:00'::timestamptz, '2026-01-08 07:43:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[62] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[26], '2026-01-12 11:22:00+00:00'::timestamptz, '2026-01-12 11:22:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[64], journaling_object_ids[65], journaling_object_ids[26], '2026-01-12 11:22:00+00:00'::timestamptz, '2026-01-12 11:22:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL, airport_ids[9]);
     flight_ids[63] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[46], '2026-01-01 07:10:00+00:00'::timestamptz, '2026-01-01 07:21:00+00:00'::timestamptz, '2026-01-01 07:41:00+00:00'::timestamptz, '2026-01-01 07:53:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[46], '2026-01-01 07:10:00+00:00'::timestamptz, '2026-01-01 07:21:00+00:00'::timestamptz, '2026-01-01 07:41:00+00:00'::timestamptz, '2026-01-01 07:53:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[64] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[21], '2026-01-02 07:10:00+00:00'::timestamptz, '2026-01-02 07:19:00+00:00'::timestamptz, '2026-01-02 07:34:00+00:00'::timestamptz, '2026-01-02 07:46:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[21], '2026-01-02 07:10:00+00:00'::timestamptz, '2026-01-02 07:19:00+00:00'::timestamptz, '2026-01-02 07:34:00+00:00'::timestamptz, '2026-01-02 07:46:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[65] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[51], '2026-01-03 07:10:00+00:00'::timestamptz, '2026-01-03 07:08:00+00:00'::timestamptz, '2026-01-03 07:49:00+00:00'::timestamptz, '2026-01-03 07:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[51], '2026-01-03 07:10:00+00:00'::timestamptz, '2026-01-03 07:08:00+00:00'::timestamptz, '2026-01-03 07:49:00+00:00'::timestamptz, '2026-01-03 07:49:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[66] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[20], '2026-01-04 07:10:00+00:00'::timestamptz, '2026-01-04 07:20:00+00:00'::timestamptz, '2026-01-04 07:53:00+00:00'::timestamptz, '2026-01-04 08:00:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[20], '2026-01-04 07:10:00+00:00'::timestamptz, '2026-01-04 07:20:00+00:00'::timestamptz, '2026-01-04 07:53:00+00:00'::timestamptz, '2026-01-04 08:00:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[67] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[30], '2026-01-05 07:10:00+00:00'::timestamptz, '2026-01-05 07:21:00+00:00'::timestamptz, '2026-01-05 07:53:00+00:00'::timestamptz, '2026-01-05 08:01:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[30], '2026-01-05 07:10:00+00:00'::timestamptz, '2026-01-05 07:21:00+00:00'::timestamptz, '2026-01-05 07:53:00+00:00'::timestamptz, '2026-01-05 08:01:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[68] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[50], '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:25:00+00:00'::timestamptz, '2026-01-06 07:51:00+00:00'::timestamptz, '2026-01-06 08:06:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[50], '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:25:00+00:00'::timestamptz, '2026-01-06 07:51:00+00:00'::timestamptz, '2026-01-06 08:06:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[69] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[11], '2026-01-07 07:10:00+00:00'::timestamptz, '2026-01-07 07:20:00+00:00'::timestamptz, '2026-01-07 07:57:00+00:00'::timestamptz, '2026-01-07 08:04:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[11], '2026-01-07 07:10:00+00:00'::timestamptz, '2026-01-07 07:20:00+00:00'::timestamptz, '2026-01-07 07:57:00+00:00'::timestamptz, '2026-01-07 08:04:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[70] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[46], '2026-01-08 07:10:00+00:00'::timestamptz, '2026-01-08 07:17:00+00:00'::timestamptz, '2026-01-08 07:42:00+00:00'::timestamptz, '2026-01-08 07:47:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[46], '2026-01-08 07:10:00+00:00'::timestamptz, '2026-01-08 07:17:00+00:00'::timestamptz, '2026-01-08 07:42:00+00:00'::timestamptz, '2026-01-08 07:47:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[71] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[21], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:45:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[66], journaling_object_ids[67], journaling_object_ids[21], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:45:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[72] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[50], '2026-01-01 07:20:00+00:00'::timestamptz, '2026-01-01 07:25:00+00:00'::timestamptz, '2026-01-01 07:57:00+00:00'::timestamptz, '2026-01-01 08:04:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[50], '2026-01-01 07:20:00+00:00'::timestamptz, '2026-01-01 07:25:00+00:00'::timestamptz, '2026-01-01 07:57:00+00:00'::timestamptz, '2026-01-01 08:04:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[73] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[30], '2026-01-02 07:20:00+00:00'::timestamptz, '2026-01-02 07:22:00+00:00'::timestamptz, '2026-01-02 07:48:00+00:00'::timestamptz, '2026-01-02 07:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[30], '2026-01-02 07:20:00+00:00'::timestamptz, '2026-01-02 07:22:00+00:00'::timestamptz, '2026-01-02 07:48:00+00:00'::timestamptz, '2026-01-02 07:50:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[74] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[11], '2026-01-03 07:20:00+00:00'::timestamptz, '2026-01-03 07:24:00+00:00'::timestamptz, '2026-01-03 07:52:00+00:00'::timestamptz, '2026-01-03 07:54:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[11], '2026-01-03 07:20:00+00:00'::timestamptz, '2026-01-03 07:24:00+00:00'::timestamptz, '2026-01-03 07:52:00+00:00'::timestamptz, '2026-01-03 07:54:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[75] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[45], '2026-01-04 07:20:00+00:00'::timestamptz, '2026-01-04 07:21:00+00:00'::timestamptz, '2026-01-04 07:56:00+00:00'::timestamptz, '2026-01-04 08:00:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[45], '2026-01-04 07:20:00+00:00'::timestamptz, '2026-01-04 07:21:00+00:00'::timestamptz, '2026-01-04 07:56:00+00:00'::timestamptz, '2026-01-04 08:00:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[76] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[16], '2026-01-05 07:20:00+00:00'::timestamptz, '2026-01-05 07:35:00+00:00'::timestamptz, '2026-01-05 08:03:00+00:00'::timestamptz, '2026-01-05 08:21:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[16], '2026-01-05 07:20:00+00:00'::timestamptz, '2026-01-05 07:35:00+00:00'::timestamptz, '2026-01-05 08:03:00+00:00'::timestamptz, '2026-01-05 08:21:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[77] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[26], '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 07:59:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[26], '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 07:59:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[78] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[21], '2026-01-07 07:20:00+00:00'::timestamptz, '2026-01-07 07:32:00+00:00'::timestamptz, '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 08:25:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[21], '2026-01-07 07:20:00+00:00'::timestamptz, '2026-01-07 07:32:00+00:00'::timestamptz, '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 08:25:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[79] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[26], '2026-01-08 07:20:00+00:00'::timestamptz, '2026-01-08 07:33:00+00:00'::timestamptz, '2026-01-08 08:10:00+00:00'::timestamptz, '2026-01-08 08:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[26], '2026-01-08 07:20:00+00:00'::timestamptz, '2026-01-08 07:33:00+00:00'::timestamptz, '2026-01-08 08:10:00+00:00'::timestamptz, '2026-01-08 08:20:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[80] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[11], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:45:00+00:00'::timestamptz, '2026-01-12 10:46:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[68], journaling_object_ids[69], journaling_object_ids[11], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:45:00+00:00'::timestamptz, '2026-01-12 10:46:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[81] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[10], '2026-01-01 07:30:00+00:00'::timestamptz, '2026-01-01 07:29:00+00:00'::timestamptz, '2026-01-01 08:24:00+00:00'::timestamptz, '2026-01-01 08:24:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[10], '2026-01-01 07:30:00+00:00'::timestamptz, '2026-01-01 07:29:00+00:00'::timestamptz, '2026-01-01 08:24:00+00:00'::timestamptz, '2026-01-01 08:24:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[82] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[26], '2026-01-02 07:30:00+00:00'::timestamptz, '2026-01-02 07:38:00+00:00'::timestamptz, '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:29:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[26], '2026-01-02 07:30:00+00:00'::timestamptz, '2026-01-02 07:38:00+00:00'::timestamptz, '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:29:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[83] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[41], '2026-01-03 07:30:00+00:00'::timestamptz, '2026-01-03 07:27:00+00:00'::timestamptz, '2026-01-03 08:15:00+00:00'::timestamptz, '2026-01-03 08:10:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[41], '2026-01-03 07:30:00+00:00'::timestamptz, '2026-01-03 07:27:00+00:00'::timestamptz, '2026-01-03 08:15:00+00:00'::timestamptz, '2026-01-03 08:10:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[84] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[36], '2026-01-04 07:30:00+00:00'::timestamptz, '2026-01-04 07:44:00+00:00'::timestamptz, '2026-01-04 08:12:00+00:00'::timestamptz, '2026-01-04 08:26:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[36], '2026-01-04 07:30:00+00:00'::timestamptz, '2026-01-04 07:44:00+00:00'::timestamptz, '2026-01-04 08:12:00+00:00'::timestamptz, '2026-01-04 08:26:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[85] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[21], '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:37:00+00:00'::timestamptz, '2026-01-05 08:06:00+00:00'::timestamptz, '2026-01-05 08:14:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[21], '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:37:00+00:00'::timestamptz, '2026-01-05 08:06:00+00:00'::timestamptz, '2026-01-05 08:14:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[86] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[35], '2026-01-06 07:30:00+00:00'::timestamptz, '2026-01-06 07:31:00+00:00'::timestamptz, '2026-01-06 08:09:00+00:00'::timestamptz, '2026-01-06 08:09:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[35], '2026-01-06 07:30:00+00:00'::timestamptz, '2026-01-06 07:31:00+00:00'::timestamptz, '2026-01-06 08:09:00+00:00'::timestamptz, '2026-01-06 08:09:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[87] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[40], '2026-01-07 07:30:00+00:00'::timestamptz, '2026-01-07 07:28:00+00:00'::timestamptz, '2026-01-07 08:07:00+00:00'::timestamptz, '2026-01-07 08:02:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[40], '2026-01-07 07:30:00+00:00'::timestamptz, '2026-01-07 07:28:00+00:00'::timestamptz, '2026-01-07 08:07:00+00:00'::timestamptz, '2026-01-07 08:02:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[88] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[10], '2026-01-08 07:30:00+00:00'::timestamptz, '2026-01-08 07:32:00+00:00'::timestamptz, '2026-01-08 08:20:00+00:00'::timestamptz, '2026-01-08 08:19:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[10], '2026-01-08 07:30:00+00:00'::timestamptz, '2026-01-08 07:32:00+00:00'::timestamptz, '2026-01-08 08:20:00+00:00'::timestamptz, '2026-01-08 08:19:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[89] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[25], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:33:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[70], journaling_object_ids[71], journaling_object_ids[25], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:33:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[90] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[15], '2026-01-01 07:40:00+00:00'::timestamptz, '2026-01-01 07:39:00+00:00'::timestamptz, '2026-01-01 08:11:00+00:00'::timestamptz, '2026-01-01 08:08:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[15], '2026-01-01 07:40:00+00:00'::timestamptz, '2026-01-01 07:39:00+00:00'::timestamptz, '2026-01-01 08:11:00+00:00'::timestamptz, '2026-01-01 08:08:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[91] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[11], '2026-01-02 07:40:00+00:00'::timestamptz, '2026-01-02 07:37:00+00:00'::timestamptz, '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:15:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[11], '2026-01-02 07:40:00+00:00'::timestamptz, '2026-01-02 07:37:00+00:00'::timestamptz, '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:15:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[92] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[15], '2026-01-03 07:40:00+00:00'::timestamptz, '2026-01-03 07:54:00+00:00'::timestamptz, '2026-01-03 08:26:00+00:00'::timestamptz, '2026-01-03 08:40:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[15], '2026-01-03 07:40:00+00:00'::timestamptz, '2026-01-03 07:54:00+00:00'::timestamptz, '2026-01-03 08:26:00+00:00'::timestamptz, '2026-01-03 08:40:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[93] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[30], '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz, '2026-01-04 08:05:00+00:00'::timestamptz, '2026-01-04 08:09:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[30], '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz, '2026-01-04 08:05:00+00:00'::timestamptz, '2026-01-04 08:09:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[94] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[16], '2026-01-05 07:40:00+00:00'::timestamptz, '2026-01-05 07:51:00+00:00'::timestamptz, '2026-01-05 08:16:00+00:00'::timestamptz, '2026-01-05 08:28:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[16], '2026-01-05 07:40:00+00:00'::timestamptz, '2026-01-05 07:51:00+00:00'::timestamptz, '2026-01-05 08:16:00+00:00'::timestamptz, '2026-01-05 08:28:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[95] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[10], '2026-01-06 07:40:00+00:00'::timestamptz, '2026-01-06 07:37:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, '2026-01-06 08:30:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[10], '2026-01-06 07:40:00+00:00'::timestamptz, '2026-01-06 07:37:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, '2026-01-06 08:30:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[96] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[40], '2026-01-07 07:40:00+00:00'::timestamptz, '2026-01-07 07:52:00+00:00'::timestamptz, '2026-01-07 08:06:00+00:00'::timestamptz, '2026-01-07 08:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[40], '2026-01-07 07:40:00+00:00'::timestamptz, '2026-01-07 07:52:00+00:00'::timestamptz, '2026-01-07 08:06:00+00:00'::timestamptz, '2026-01-07 08:20:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[97] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[30], '2026-01-08 07:40:00+00:00'::timestamptz, '2026-01-08 07:45:00+00:00'::timestamptz, '2026-01-08 08:24:00+00:00'::timestamptz, '2026-01-08 08:26:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[30], '2026-01-08 07:40:00+00:00'::timestamptz, '2026-01-08 07:45:00+00:00'::timestamptz, '2026-01-08 08:24:00+00:00'::timestamptz, '2026-01-08 08:26:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[98] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[46], '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[72], journaling_object_ids[73], journaling_object_ids[46], '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[99] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[21], '2026-01-01 07:50:00+00:00'::timestamptz, '2026-01-01 07:51:00+00:00'::timestamptz, '2026-01-01 08:38:00+00:00'::timestamptz, '2026-01-01 08:42:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[21], '2026-01-01 07:50:00+00:00'::timestamptz, '2026-01-01 07:51:00+00:00'::timestamptz, '2026-01-01 08:38:00+00:00'::timestamptz, '2026-01-01 08:42:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[100] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[46], '2026-01-02 07:50:00+00:00'::timestamptz, '2026-01-02 07:48:00+00:00'::timestamptz, '2026-01-02 08:25:00+00:00'::timestamptz, '2026-01-02 08:26:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[46], '2026-01-02 07:50:00+00:00'::timestamptz, '2026-01-02 07:48:00+00:00'::timestamptz, '2026-01-02 08:25:00+00:00'::timestamptz, '2026-01-02 08:26:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[101] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[36], '2026-01-03 07:50:00+00:00'::timestamptz, '2026-01-03 08:05:00+00:00'::timestamptz, '2026-01-03 08:29:00+00:00'::timestamptz, '2026-01-03 08:44:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[36], '2026-01-03 07:50:00+00:00'::timestamptz, '2026-01-03 08:05:00+00:00'::timestamptz, '2026-01-03 08:29:00+00:00'::timestamptz, '2026-01-03 08:44:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[102] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[45], '2026-01-04 07:50:00+00:00'::timestamptz, '2026-01-04 07:55:00+00:00'::timestamptz, '2026-01-04 08:38:00+00:00'::timestamptz, '2026-01-04 08:41:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[45], '2026-01-04 07:50:00+00:00'::timestamptz, '2026-01-04 07:55:00+00:00'::timestamptz, '2026-01-04 08:38:00+00:00'::timestamptz, '2026-01-04 08:41:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[103] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[10], '2026-01-05 07:50:00+00:00'::timestamptz, '2026-01-05 07:55:00+00:00'::timestamptz, '2026-01-05 08:24:00+00:00'::timestamptz, '2026-01-05 08:31:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[10], '2026-01-05 07:50:00+00:00'::timestamptz, '2026-01-05 07:55:00+00:00'::timestamptz, '2026-01-05 08:24:00+00:00'::timestamptz, '2026-01-05 08:31:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[104] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[51], '2026-01-06 07:50:00+00:00'::timestamptz, '2026-01-06 07:52:00+00:00'::timestamptz, '2026-01-06 08:46:00+00:00'::timestamptz, '2026-01-06 08:45:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[51], '2026-01-06 07:50:00+00:00'::timestamptz, '2026-01-06 07:52:00+00:00'::timestamptz, '2026-01-06 08:46:00+00:00'::timestamptz, '2026-01-06 08:45:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[105] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[25], '2026-01-07 07:50:00+00:00'::timestamptz, '2026-01-07 07:51:00+00:00'::timestamptz, '2026-01-07 08:39:00+00:00'::timestamptz, '2026-01-07 08:38:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[25], '2026-01-07 07:50:00+00:00'::timestamptz, '2026-01-07 07:51:00+00:00'::timestamptz, '2026-01-07 08:39:00+00:00'::timestamptz, '2026-01-07 08:38:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[106] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[16], '2026-01-08 07:50:00+00:00'::timestamptz, '2026-01-08 07:53:00+00:00'::timestamptz, '2026-01-08 08:36:00+00:00'::timestamptz, '2026-01-08 08:40:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[16], '2026-01-08 07:50:00+00:00'::timestamptz, '2026-01-08 07:53:00+00:00'::timestamptz, '2026-01-08 08:36:00+00:00'::timestamptz, '2026-01-08 08:40:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[107] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[40], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:38:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[74], journaling_object_ids[75], journaling_object_ids[40], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:38:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[108] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[26], '2026-01-01 08:00:00+00:00'::timestamptz, '2026-01-01 08:06:00+00:00'::timestamptz, '2026-01-01 08:28:00+00:00'::timestamptz, '2026-01-01 08:32:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[26], '2026-01-01 08:00:00+00:00'::timestamptz, '2026-01-01 08:06:00+00:00'::timestamptz, '2026-01-01 08:28:00+00:00'::timestamptz, '2026-01-01 08:32:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[109] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[31], '2026-01-02 08:00:00+00:00'::timestamptz, '2026-01-02 08:08:00+00:00'::timestamptz, '2026-01-02 08:29:00+00:00'::timestamptz, '2026-01-02 08:36:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[31], '2026-01-02 08:00:00+00:00'::timestamptz, '2026-01-02 08:08:00+00:00'::timestamptz, '2026-01-02 08:29:00+00:00'::timestamptz, '2026-01-02 08:36:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[110] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[25], '2026-01-03 08:00:00+00:00'::timestamptz, '2026-01-03 08:13:00+00:00'::timestamptz, '2026-01-03 08:36:00+00:00'::timestamptz, '2026-01-03 08:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[25], '2026-01-03 08:00:00+00:00'::timestamptz, '2026-01-03 08:13:00+00:00'::timestamptz, '2026-01-03 08:36:00+00:00'::timestamptz, '2026-01-03 08:49:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[111] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[20], '2026-01-04 08:00:00+00:00'::timestamptz, '2026-01-04 07:58:00+00:00'::timestamptz, '2026-01-04 08:49:00+00:00'::timestamptz, '2026-01-04 08:44:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[20], '2026-01-04 08:00:00+00:00'::timestamptz, '2026-01-04 07:58:00+00:00'::timestamptz, '2026-01-04 08:49:00+00:00'::timestamptz, '2026-01-04 08:44:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[112] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[30], '2026-01-05 08:00:00+00:00'::timestamptz, '2026-01-05 08:04:00+00:00'::timestamptz, '2026-01-05 08:42:00+00:00'::timestamptz, '2026-01-05 08:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[30], '2026-01-05 08:00:00+00:00'::timestamptz, '2026-01-05 08:04:00+00:00'::timestamptz, '2026-01-05 08:42:00+00:00'::timestamptz, '2026-01-05 08:49:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[113] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[10], '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz, '2026-01-06 08:46:00+00:00'::timestamptz, '2026-01-06 08:47:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[10], '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz, '2026-01-06 08:46:00+00:00'::timestamptz, '2026-01-06 08:47:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[114] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[41], '2026-01-07 08:00:00+00:00'::timestamptz, '2026-01-07 08:05:00+00:00'::timestamptz, '2026-01-07 08:36:00+00:00'::timestamptz, '2026-01-07 08:39:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[41], '2026-01-07 08:00:00+00:00'::timestamptz, '2026-01-07 08:05:00+00:00'::timestamptz, '2026-01-07 08:36:00+00:00'::timestamptz, '2026-01-07 08:39:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[115] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[21], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:43:00+00:00'::timestamptz, '2026-01-12 10:42:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[76], journaling_object_ids[77], journaling_object_ids[21], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:43:00+00:00'::timestamptz, '2026-01-12 10:42:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[116] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[30], '2026-01-01 08:10:00+00:00'::timestamptz, '2026-01-01 08:14:00+00:00'::timestamptz, '2026-01-01 09:06:00+00:00'::timestamptz, '2026-01-01 09:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[30], '2026-01-01 08:10:00+00:00'::timestamptz, '2026-01-01 08:14:00+00:00'::timestamptz, '2026-01-01 09:06:00+00:00'::timestamptz, '2026-01-01 09:07:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[117] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[10], '2026-01-02 08:10:00+00:00'::timestamptz, '2026-01-02 08:16:00+00:00'::timestamptz, '2026-01-02 09:01:00+00:00'::timestamptz, '2026-01-02 09:04:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[10], '2026-01-02 08:10:00+00:00'::timestamptz, '2026-01-02 08:16:00+00:00'::timestamptz, '2026-01-02 09:01:00+00:00'::timestamptz, '2026-01-02 09:04:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[118] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[51], '2026-01-03 08:10:00+00:00'::timestamptz, '2026-01-03 08:10:00+00:00'::timestamptz, '2026-01-03 08:56:00+00:00'::timestamptz, '2026-01-03 08:54:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[51], '2026-01-03 08:10:00+00:00'::timestamptz, '2026-01-03 08:10:00+00:00'::timestamptz, '2026-01-03 08:56:00+00:00'::timestamptz, '2026-01-03 08:54:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[119] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[11], '2026-01-04 08:10:00+00:00'::timestamptz, '2026-01-04 08:20:00+00:00'::timestamptz, '2026-01-04 09:02:00+00:00'::timestamptz, '2026-01-04 09:11:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[11], '2026-01-04 08:10:00+00:00'::timestamptz, '2026-01-04 08:20:00+00:00'::timestamptz, '2026-01-04 09:02:00+00:00'::timestamptz, '2026-01-04 09:11:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[120] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[30], '2026-01-05 08:10:00+00:00'::timestamptz, '2026-01-05 08:07:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[30], '2026-01-05 08:10:00+00:00'::timestamptz, '2026-01-05 08:07:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[121] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[20], '2026-01-06 08:10:00+00:00'::timestamptz, '2026-01-06 08:21:00+00:00'::timestamptz, '2026-01-06 08:56:00+00:00'::timestamptz, '2026-01-06 09:06:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[20], '2026-01-06 08:10:00+00:00'::timestamptz, '2026-01-06 08:21:00+00:00'::timestamptz, '2026-01-06 08:56:00+00:00'::timestamptz, '2026-01-06 09:06:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[122] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[15], '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 08:19:00+00:00'::timestamptz, '2026-01-07 08:48:00+00:00'::timestamptz, '2026-01-07 08:58:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[15], '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 08:19:00+00:00'::timestamptz, '2026-01-07 08:48:00+00:00'::timestamptz, '2026-01-07 08:58:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[123] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[31], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:36:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[78], journaling_object_ids[79], journaling_object_ids[31], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:36:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[124] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[36], '2026-01-01 08:20:00+00:00'::timestamptz, '2026-01-01 08:26:00+00:00'::timestamptz, '2026-01-01 09:03:00+00:00'::timestamptz, '2026-01-01 09:12:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[36], '2026-01-01 08:20:00+00:00'::timestamptz, '2026-01-01 08:26:00+00:00'::timestamptz, '2026-01-01 09:03:00+00:00'::timestamptz, '2026-01-01 09:12:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[125] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[10], '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:27:00+00:00'::timestamptz, '2026-01-02 09:01:00+00:00'::timestamptz, '2026-01-02 09:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[10], '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:27:00+00:00'::timestamptz, '2026-01-02 09:01:00+00:00'::timestamptz, '2026-01-02 09:07:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[126] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[50], '2026-01-03 08:20:00+00:00'::timestamptz, '2026-01-03 08:18:00+00:00'::timestamptz, '2026-01-03 08:52:00+00:00'::timestamptz, '2026-01-03 08:52:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[50], '2026-01-03 08:20:00+00:00'::timestamptz, '2026-01-03 08:18:00+00:00'::timestamptz, '2026-01-03 08:52:00+00:00'::timestamptz, '2026-01-03 08:52:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[127] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[10], '2026-01-04 08:20:00+00:00'::timestamptz, '2026-01-04 08:35:00+00:00'::timestamptz, '2026-01-04 09:14:00+00:00'::timestamptz, '2026-01-04 09:28:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[10], '2026-01-04 08:20:00+00:00'::timestamptz, '2026-01-04 08:35:00+00:00'::timestamptz, '2026-01-04 09:14:00+00:00'::timestamptz, '2026-01-04 09:28:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[128] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[31], '2026-01-05 08:20:00+00:00'::timestamptz, '2026-01-05 08:19:00+00:00'::timestamptz, '2026-01-05 09:13:00+00:00'::timestamptz, '2026-01-05 09:10:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[31], '2026-01-05 08:20:00+00:00'::timestamptz, '2026-01-05 08:19:00+00:00'::timestamptz, '2026-01-05 09:13:00+00:00'::timestamptz, '2026-01-05 09:10:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[129] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[10], '2026-01-06 08:20:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, '2026-01-06 09:00:00+00:00'::timestamptz, '2026-01-06 09:10:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[10], '2026-01-06 08:20:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, '2026-01-06 09:00:00+00:00'::timestamptz, '2026-01-06 09:10:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[130] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[36], '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:28:00+00:00'::timestamptz, '2026-01-07 09:04:00+00:00'::timestamptz, '2026-01-07 09:12:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[36], '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:28:00+00:00'::timestamptz, '2026-01-07 09:04:00+00:00'::timestamptz, '2026-01-07 09:12:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[131] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[26], '2026-01-12 11:31:00+00:00'::timestamptz, '2026-01-12 11:31:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[80], journaling_object_ids[81], journaling_object_ids[26], '2026-01-12 11:31:00+00:00'::timestamptz, '2026-01-12 11:31:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL, airport_ids[3]);
     flight_ids[132] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[40], '2026-01-01 08:30:00+00:00'::timestamptz, '2026-01-01 08:42:00+00:00'::timestamptz, '2026-01-01 09:13:00+00:00'::timestamptz, '2026-01-01 09:27:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[40], '2026-01-01 08:30:00+00:00'::timestamptz, '2026-01-01 08:42:00+00:00'::timestamptz, '2026-01-01 09:13:00+00:00'::timestamptz, '2026-01-01 09:27:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[133] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[35], '2026-01-02 08:30:00+00:00'::timestamptz, '2026-01-02 08:35:00+00:00'::timestamptz, '2026-01-02 08:56:00+00:00'::timestamptz, '2026-01-02 09:03:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[35], '2026-01-02 08:30:00+00:00'::timestamptz, '2026-01-02 08:35:00+00:00'::timestamptz, '2026-01-02 08:56:00+00:00'::timestamptz, '2026-01-02 09:03:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[134] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[46], '2026-01-03 08:30:00+00:00'::timestamptz, '2026-01-03 08:40:00+00:00'::timestamptz, '2026-01-03 09:16:00+00:00'::timestamptz, '2026-01-03 09:25:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[46], '2026-01-03 08:30:00+00:00'::timestamptz, '2026-01-03 08:40:00+00:00'::timestamptz, '2026-01-03 09:16:00+00:00'::timestamptz, '2026-01-03 09:25:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[135] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[16], '2026-01-04 08:30:00+00:00'::timestamptz, '2026-01-04 08:33:00+00:00'::timestamptz, '2026-01-04 09:02:00+00:00'::timestamptz, '2026-01-04 09:02:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[16], '2026-01-04 08:30:00+00:00'::timestamptz, '2026-01-04 08:33:00+00:00'::timestamptz, '2026-01-04 09:02:00+00:00'::timestamptz, '2026-01-04 09:02:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[136] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[25], '2026-01-05 08:30:00+00:00'::timestamptz, '2026-01-05 08:28:00+00:00'::timestamptz, '2026-01-05 09:17:00+00:00'::timestamptz, '2026-01-05 09:12:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[25], '2026-01-05 08:30:00+00:00'::timestamptz, '2026-01-05 08:28:00+00:00'::timestamptz, '2026-01-05 09:17:00+00:00'::timestamptz, '2026-01-05 09:12:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[137] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[40], '2026-01-06 08:30:00+00:00'::timestamptz, '2026-01-06 08:33:00+00:00'::timestamptz, '2026-01-06 09:17:00+00:00'::timestamptz, '2026-01-06 09:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[40], '2026-01-06 08:30:00+00:00'::timestamptz, '2026-01-06 08:33:00+00:00'::timestamptz, '2026-01-06 09:17:00+00:00'::timestamptz, '2026-01-06 09:20:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[138] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[35], '2026-01-07 08:30:00+00:00'::timestamptz, '2026-01-07 08:31:00+00:00'::timestamptz, '2026-01-07 09:06:00+00:00'::timestamptz, '2026-01-07 09:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[35], '2026-01-07 08:30:00+00:00'::timestamptz, '2026-01-07 08:31:00+00:00'::timestamptz, '2026-01-07 09:06:00+00:00'::timestamptz, '2026-01-07 09:07:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[139] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[11], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:56:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[82], journaling_object_ids[83], journaling_object_ids[11], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:56:00+00:00'::timestamptz, NULL, airport_ids[4]);
     flight_ids[140] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[45], '2026-01-01 08:40:00+00:00'::timestamptz, '2026-01-01 08:54:00+00:00'::timestamptz, '2026-01-01 09:17:00+00:00'::timestamptz, '2026-01-01 09:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[45], '2026-01-01 08:40:00+00:00'::timestamptz, '2026-01-01 08:54:00+00:00'::timestamptz, '2026-01-01 09:17:00+00:00'::timestamptz, '2026-01-01 09:34:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[141] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[31], '2026-01-02 08:40:00+00:00'::timestamptz, '2026-01-02 08:53:00+00:00'::timestamptz, '2026-01-02 09:17:00+00:00'::timestamptz, '2026-01-02 09:30:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[31], '2026-01-02 08:40:00+00:00'::timestamptz, '2026-01-02 08:53:00+00:00'::timestamptz, '2026-01-02 09:17:00+00:00'::timestamptz, '2026-01-02 09:30:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[142] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[25], '2026-01-03 08:40:00+00:00'::timestamptz, '2026-01-03 08:40:00+00:00'::timestamptz, '2026-01-03 09:08:00+00:00'::timestamptz, '2026-01-03 09:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[25], '2026-01-03 08:40:00+00:00'::timestamptz, '2026-01-03 08:40:00+00:00'::timestamptz, '2026-01-03 09:08:00+00:00'::timestamptz, '2026-01-03 09:07:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[143] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[11], '2026-01-04 08:40:00+00:00'::timestamptz, '2026-01-04 08:46:00+00:00'::timestamptz, '2026-01-04 09:07:00+00:00'::timestamptz, '2026-01-04 09:12:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[11], '2026-01-04 08:40:00+00:00'::timestamptz, '2026-01-04 08:46:00+00:00'::timestamptz, '2026-01-04 09:07:00+00:00'::timestamptz, '2026-01-04 09:12:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[144] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[40], '2026-01-05 08:40:00+00:00'::timestamptz, '2026-01-05 08:48:00+00:00'::timestamptz, '2026-01-05 09:34:00+00:00'::timestamptz, '2026-01-05 09:43:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[40], '2026-01-05 08:40:00+00:00'::timestamptz, '2026-01-05 08:48:00+00:00'::timestamptz, '2026-01-05 09:34:00+00:00'::timestamptz, '2026-01-05 09:43:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[145] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[16], '2026-01-06 08:40:00+00:00'::timestamptz, '2026-01-06 08:42:00+00:00'::timestamptz, '2026-01-06 09:06:00+00:00'::timestamptz, '2026-01-06 09:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[16], '2026-01-06 08:40:00+00:00'::timestamptz, '2026-01-06 08:42:00+00:00'::timestamptz, '2026-01-06 09:06:00+00:00'::timestamptz, '2026-01-06 09:07:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[146] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[20], '2026-01-07 08:40:00+00:00'::timestamptz, '2026-01-07 08:48:00+00:00'::timestamptz, '2026-01-07 09:06:00+00:00'::timestamptz, '2026-01-07 09:13:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[20], '2026-01-07 08:40:00+00:00'::timestamptz, '2026-01-07 08:48:00+00:00'::timestamptz, '2026-01-07 09:06:00+00:00'::timestamptz, '2026-01-07 09:13:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[147] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[46], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:28:00+00:00'::timestamptz, '2026-01-12 10:26:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[84], journaling_object_ids[85], journaling_object_ids[46], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:28:00+00:00'::timestamptz, '2026-01-12 10:26:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[148] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[50], '2026-01-01 08:50:00+00:00'::timestamptz, '2026-01-01 08:51:00+00:00'::timestamptz, '2026-01-01 09:33:00+00:00'::timestamptz, '2026-01-01 09:33:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[50], '2026-01-01 08:50:00+00:00'::timestamptz, '2026-01-01 08:51:00+00:00'::timestamptz, '2026-01-01 09:33:00+00:00'::timestamptz, '2026-01-01 09:33:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[149] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[20], '2026-01-02 08:50:00+00:00'::timestamptz, '2026-01-02 09:05:00+00:00'::timestamptz, '2026-01-02 09:20:00+00:00'::timestamptz, '2026-01-02 09:32:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[20], '2026-01-02 08:50:00+00:00'::timestamptz, '2026-01-02 09:05:00+00:00'::timestamptz, '2026-01-02 09:20:00+00:00'::timestamptz, '2026-01-02 09:32:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[150] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[10], '2026-01-03 08:50:00+00:00'::timestamptz, '2026-01-03 08:50:00+00:00'::timestamptz, '2026-01-03 09:39:00+00:00'::timestamptz, '2026-01-03 09:37:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[10], '2026-01-03 08:50:00+00:00'::timestamptz, '2026-01-03 08:50:00+00:00'::timestamptz, '2026-01-03 09:39:00+00:00'::timestamptz, '2026-01-03 09:37:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[151] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[51], '2026-01-04 08:50:00+00:00'::timestamptz, '2026-01-04 09:04:00+00:00'::timestamptz, '2026-01-04 09:18:00+00:00'::timestamptz, '2026-01-04 09:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[51], '2026-01-04 08:50:00+00:00'::timestamptz, '2026-01-04 09:04:00+00:00'::timestamptz, '2026-01-04 09:18:00+00:00'::timestamptz, '2026-01-04 09:34:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[152] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[20], '2026-01-05 08:50:00+00:00'::timestamptz, '2026-01-05 08:48:00+00:00'::timestamptz, '2026-01-05 09:26:00+00:00'::timestamptz, '2026-01-05 09:22:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[20], '2026-01-05 08:50:00+00:00'::timestamptz, '2026-01-05 08:48:00+00:00'::timestamptz, '2026-01-05 09:26:00+00:00'::timestamptz, '2026-01-05 09:22:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[153] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[11], '2026-01-06 08:50:00+00:00'::timestamptz, '2026-01-06 09:01:00+00:00'::timestamptz, '2026-01-06 09:44:00+00:00'::timestamptz, '2026-01-06 09:55:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[11], '2026-01-06 08:50:00+00:00'::timestamptz, '2026-01-06 09:01:00+00:00'::timestamptz, '2026-01-06 09:44:00+00:00'::timestamptz, '2026-01-06 09:55:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[154] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[30], '2026-01-07 08:50:00+00:00'::timestamptz, '2026-01-07 08:58:00+00:00'::timestamptz, '2026-01-07 09:25:00+00:00'::timestamptz, '2026-01-07 09:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[30], '2026-01-07 08:50:00+00:00'::timestamptz, '2026-01-07 08:58:00+00:00'::timestamptz, '2026-01-07 09:25:00+00:00'::timestamptz, '2026-01-07 09:34:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[155] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[15], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:36:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[86], journaling_object_ids[87], journaling_object_ids[15], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:36:00+00:00'::timestamptz, NULL, airport_ids[7]);
     flight_ids[156] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[11], '2026-01-01 09:00:00+00:00'::timestamptz, '2026-01-01 08:58:00+00:00'::timestamptz, '2026-01-01 09:29:00+00:00'::timestamptz, '2026-01-01 09:30:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[11], '2026-01-01 09:00:00+00:00'::timestamptz, '2026-01-01 08:58:00+00:00'::timestamptz, '2026-01-01 09:29:00+00:00'::timestamptz, '2026-01-01 09:30:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[157] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[16], '2026-01-02 09:00:00+00:00'::timestamptz, '2026-01-02 09:00:00+00:00'::timestamptz, '2026-01-02 09:40:00+00:00'::timestamptz, '2026-01-02 09:42:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[16], '2026-01-02 09:00:00+00:00'::timestamptz, '2026-01-02 09:00:00+00:00'::timestamptz, '2026-01-02 09:40:00+00:00'::timestamptz, '2026-01-02 09:42:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[158] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[30], '2026-01-03 09:00:00+00:00'::timestamptz, '2026-01-03 09:08:00+00:00'::timestamptz, '2026-01-03 09:43:00+00:00'::timestamptz, '2026-01-03 09:53:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[30], '2026-01-03 09:00:00+00:00'::timestamptz, '2026-01-03 09:08:00+00:00'::timestamptz, '2026-01-03 09:43:00+00:00'::timestamptz, '2026-01-03 09:53:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[159] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[15], '2026-01-04 09:00:00+00:00'::timestamptz, '2026-01-04 08:58:00+00:00'::timestamptz, '2026-01-04 09:31:00+00:00'::timestamptz, '2026-01-04 09:32:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[15], '2026-01-04 09:00:00+00:00'::timestamptz, '2026-01-04 08:58:00+00:00'::timestamptz, '2026-01-04 09:31:00+00:00'::timestamptz, '2026-01-04 09:32:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[160] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[10], '2026-01-05 09:00:00+00:00'::timestamptz, '2026-01-05 09:13:00+00:00'::timestamptz, '2026-01-05 09:39:00+00:00'::timestamptz, '2026-01-05 09:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[10], '2026-01-05 09:00:00+00:00'::timestamptz, '2026-01-05 09:13:00+00:00'::timestamptz, '2026-01-05 09:39:00+00:00'::timestamptz, '2026-01-05 09:49:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[161] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[25], '2026-01-06 09:00:00+00:00'::timestamptz, '2026-01-06 09:05:00+00:00'::timestamptz, '2026-01-06 09:49:00+00:00'::timestamptz, '2026-01-06 09:57:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[25], '2026-01-06 09:00:00+00:00'::timestamptz, '2026-01-06 09:05:00+00:00'::timestamptz, '2026-01-06 09:49:00+00:00'::timestamptz, '2026-01-06 09:57:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[162] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[21], '2026-01-07 09:00:00+00:00'::timestamptz, '2026-01-07 09:09:00+00:00'::timestamptz, '2026-01-07 09:50:00+00:00'::timestamptz, '2026-01-07 10:01:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[21], '2026-01-07 09:00:00+00:00'::timestamptz, '2026-01-07 09:09:00+00:00'::timestamptz, '2026-01-07 09:50:00+00:00'::timestamptz, '2026-01-07 10:01:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[163] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[16], '2026-01-12 11:29:00+00:00'::timestamptz, '2026-01-12 11:29:00+00:00'::timestamptz, '2026-01-12 12:01:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[88], journaling_object_ids[89], journaling_object_ids[16], '2026-01-12 11:29:00+00:00'::timestamptz, '2026-01-12 11:29:00+00:00'::timestamptz, '2026-01-12 12:01:00+00:00'::timestamptz, NULL, airport_ids[3]);
     flight_ids[164] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[15], '2026-01-01 09:10:00+00:00'::timestamptz, '2026-01-01 09:08:00+00:00'::timestamptz, '2026-01-01 10:00:00+00:00'::timestamptz, '2026-01-01 10:01:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[15], '2026-01-01 09:10:00+00:00'::timestamptz, '2026-01-01 09:08:00+00:00'::timestamptz, '2026-01-01 10:00:00+00:00'::timestamptz, '2026-01-01 10:01:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[165] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[31], '2026-01-02 09:10:00+00:00'::timestamptz, '2026-01-02 09:21:00+00:00'::timestamptz, '2026-01-02 09:44:00+00:00'::timestamptz, '2026-01-02 09:58:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[31], '2026-01-02 09:10:00+00:00'::timestamptz, '2026-01-02 09:21:00+00:00'::timestamptz, '2026-01-02 09:44:00+00:00'::timestamptz, '2026-01-02 09:58:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[166] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[25], '2026-01-03 09:10:00+00:00'::timestamptz, '2026-01-03 09:17:00+00:00'::timestamptz, '2026-01-03 09:40:00+00:00'::timestamptz, '2026-01-03 09:45:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[25], '2026-01-03 09:10:00+00:00'::timestamptz, '2026-01-03 09:17:00+00:00'::timestamptz, '2026-01-03 09:40:00+00:00'::timestamptz, '2026-01-03 09:45:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[167] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[16], '2026-01-04 09:10:00+00:00'::timestamptz, '2026-01-04 09:09:00+00:00'::timestamptz, '2026-01-04 09:35:00+00:00'::timestamptz, '2026-01-04 09:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[16], '2026-01-04 09:10:00+00:00'::timestamptz, '2026-01-04 09:09:00+00:00'::timestamptz, '2026-01-04 09:35:00+00:00'::timestamptz, '2026-01-04 09:34:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[168] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[35], '2026-01-05 09:10:00+00:00'::timestamptz, '2026-01-05 09:11:00+00:00'::timestamptz, '2026-01-05 09:47:00+00:00'::timestamptz, '2026-01-05 09:51:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[35], '2026-01-05 09:10:00+00:00'::timestamptz, '2026-01-05 09:11:00+00:00'::timestamptz, '2026-01-05 09:47:00+00:00'::timestamptz, '2026-01-05 09:51:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[169] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[25], '2026-01-06 09:10:00+00:00'::timestamptz, '2026-01-06 09:17:00+00:00'::timestamptz, '2026-01-06 09:52:00+00:00'::timestamptz, '2026-01-06 09:59:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[25], '2026-01-06 09:10:00+00:00'::timestamptz, '2026-01-06 09:17:00+00:00'::timestamptz, '2026-01-06 09:52:00+00:00'::timestamptz, '2026-01-06 09:59:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[170] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[36], '2026-01-07 09:10:00+00:00'::timestamptz, '2026-01-07 09:16:00+00:00'::timestamptz, '2026-01-07 10:00:00+00:00'::timestamptz, '2026-01-07 10:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[36], '2026-01-07 09:10:00+00:00'::timestamptz, '2026-01-07 09:16:00+00:00'::timestamptz, '2026-01-07 10:00:00+00:00'::timestamptz, '2026-01-07 10:07:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[171] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[21], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:56:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[90], journaling_object_ids[91], journaling_object_ids[21], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:56:00+00:00'::timestamptz, NULL, airport_ids[5]);
     flight_ids[172] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[21], '2026-01-01 06:00:00+00:00'::timestamptz, '2026-01-01 06:01:00+00:00'::timestamptz, '2026-01-01 06:47:00+00:00'::timestamptz, '2026-01-01 06:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[21], '2026-01-01 06:00:00+00:00'::timestamptz, '2026-01-01 06:01:00+00:00'::timestamptz, '2026-01-01 06:47:00+00:00'::timestamptz, '2026-01-01 06:50:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[173] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[16], '2026-01-02 06:00:00+00:00'::timestamptz, '2026-01-02 06:15:00+00:00'::timestamptz, '2026-01-02 06:33:00+00:00'::timestamptz, '2026-01-02 06:47:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[16], '2026-01-02 06:00:00+00:00'::timestamptz, '2026-01-02 06:15:00+00:00'::timestamptz, '2026-01-02 06:33:00+00:00'::timestamptz, '2026-01-02 06:47:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[174] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[45], '2026-01-03 06:00:00+00:00'::timestamptz, '2026-01-03 06:01:00+00:00'::timestamptz, '2026-01-03 06:47:00+00:00'::timestamptz, '2026-01-03 06:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[45], '2026-01-03 06:00:00+00:00'::timestamptz, '2026-01-03 06:01:00+00:00'::timestamptz, '2026-01-03 06:47:00+00:00'::timestamptz, '2026-01-03 06:50:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[175] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[11], '2026-01-04 06:00:00+00:00'::timestamptz, '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:28:00+00:00'::timestamptz, '2026-01-04 06:35:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[11], '2026-01-04 06:00:00+00:00'::timestamptz, '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:28:00+00:00'::timestamptz, '2026-01-04 06:35:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[176] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[21], '2026-01-05 06:00:00+00:00'::timestamptz, '2026-01-05 06:12:00+00:00'::timestamptz, '2026-01-05 06:53:00+00:00'::timestamptz, '2026-01-05 07:02:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[21], '2026-01-05 06:00:00+00:00'::timestamptz, '2026-01-05 06:12:00+00:00'::timestamptz, '2026-01-05 06:53:00+00:00'::timestamptz, '2026-01-05 07:02:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[177] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[46], '2026-01-06 06:00:00+00:00'::timestamptz, '2026-01-06 05:59:00+00:00'::timestamptz, '2026-01-06 06:24:00+00:00'::timestamptz, '2026-01-06 06:25:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[46], '2026-01-06 06:00:00+00:00'::timestamptz, '2026-01-06 05:59:00+00:00'::timestamptz, '2026-01-06 06:24:00+00:00'::timestamptz, '2026-01-06 06:25:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[178] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[20], '2026-01-07 06:00:00+00:00'::timestamptz, '2026-01-07 06:05:00+00:00'::timestamptz, '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[20], '2026-01-07 06:00:00+00:00'::timestamptz, '2026-01-07 06:05:00+00:00'::timestamptz, '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[179] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[11], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:37:00+00:00'::timestamptz, '2026-01-12 10:36:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[92], journaling_object_ids[93], journaling_object_ids[11], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:37:00+00:00'::timestamptz, '2026-01-12 10:36:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[180] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[25], '2026-01-01 06:10:00+00:00'::timestamptz, '2026-01-01 06:07:00+00:00'::timestamptz, '2026-01-01 06:52:00+00:00'::timestamptz, '2026-01-01 06:51:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[25], '2026-01-01 06:10:00+00:00'::timestamptz, '2026-01-01 06:07:00+00:00'::timestamptz, '2026-01-01 06:52:00+00:00'::timestamptz, '2026-01-01 06:51:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[181] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[36], '2026-01-02 06:10:00+00:00'::timestamptz, '2026-01-02 06:14:00+00:00'::timestamptz, '2026-01-02 06:54:00+00:00'::timestamptz, '2026-01-02 06:59:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[36], '2026-01-02 06:10:00+00:00'::timestamptz, '2026-01-02 06:14:00+00:00'::timestamptz, '2026-01-02 06:54:00+00:00'::timestamptz, '2026-01-02 06:59:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[182] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[15], '2026-01-03 06:10:00+00:00'::timestamptz, '2026-01-03 06:08:00+00:00'::timestamptz, '2026-01-03 07:02:00+00:00'::timestamptz, '2026-01-03 07:03:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[15], '2026-01-03 06:10:00+00:00'::timestamptz, '2026-01-03 06:08:00+00:00'::timestamptz, '2026-01-03 07:02:00+00:00'::timestamptz, '2026-01-03 07:03:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[183] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[10], '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:14:00+00:00'::timestamptz, '2026-01-04 07:02:00+00:00'::timestamptz, '2026-01-04 07:04:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[10], '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:14:00+00:00'::timestamptz, '2026-01-04 07:02:00+00:00'::timestamptz, '2026-01-04 07:04:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[184] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[35], '2026-01-05 06:10:00+00:00'::timestamptz, '2026-01-05 06:15:00+00:00'::timestamptz, '2026-01-05 06:39:00+00:00'::timestamptz, '2026-01-05 06:44:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[35], '2026-01-05 06:10:00+00:00'::timestamptz, '2026-01-05 06:15:00+00:00'::timestamptz, '2026-01-05 06:39:00+00:00'::timestamptz, '2026-01-05 06:44:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[185] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[11], '2026-01-06 06:10:00+00:00'::timestamptz, '2026-01-06 06:07:00+00:00'::timestamptz, '2026-01-06 06:43:00+00:00'::timestamptz, '2026-01-06 06:39:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[11], '2026-01-06 06:10:00+00:00'::timestamptz, '2026-01-06 06:07:00+00:00'::timestamptz, '2026-01-06 06:43:00+00:00'::timestamptz, '2026-01-06 06:39:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[186] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[41], '2026-01-07 06:10:00+00:00'::timestamptz, '2026-01-07 06:08:00+00:00'::timestamptz, '2026-01-07 06:53:00+00:00'::timestamptz, '2026-01-07 06:52:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[41], '2026-01-07 06:10:00+00:00'::timestamptz, '2026-01-07 06:08:00+00:00'::timestamptz, '2026-01-07 06:53:00+00:00'::timestamptz, '2026-01-07 06:52:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[187] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[20], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:32:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[94], journaling_object_ids[95], journaling_object_ids[20], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:32:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[188] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[31], '2026-01-01 06:20:00+00:00'::timestamptz, '2026-01-01 06:31:00+00:00'::timestamptz, '2026-01-01 07:01:00+00:00'::timestamptz, '2026-01-01 07:11:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[31], '2026-01-01 06:20:00+00:00'::timestamptz, '2026-01-01 06:31:00+00:00'::timestamptz, '2026-01-01 07:01:00+00:00'::timestamptz, '2026-01-01 07:11:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[189] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[11], '2026-01-02 06:20:00+00:00'::timestamptz, '2026-01-02 06:27:00+00:00'::timestamptz, '2026-01-02 07:07:00+00:00'::timestamptz, '2026-01-02 07:17:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[11], '2026-01-02 06:20:00+00:00'::timestamptz, '2026-01-02 06:27:00+00:00'::timestamptz, '2026-01-02 07:07:00+00:00'::timestamptz, '2026-01-02 07:17:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[190] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[41], '2026-01-03 06:20:00+00:00'::timestamptz, '2026-01-03 06:22:00+00:00'::timestamptz, '2026-01-03 07:08:00+00:00'::timestamptz, '2026-01-03 07:11:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[41], '2026-01-03 06:20:00+00:00'::timestamptz, '2026-01-03 06:22:00+00:00'::timestamptz, '2026-01-03 07:08:00+00:00'::timestamptz, '2026-01-03 07:11:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[191] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[10], '2026-01-04 06:20:00+00:00'::timestamptz, '2026-01-04 06:17:00+00:00'::timestamptz, '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 06:59:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[10], '2026-01-04 06:20:00+00:00'::timestamptz, '2026-01-04 06:17:00+00:00'::timestamptz, '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 06:59:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[192] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[50], '2026-01-05 06:20:00+00:00'::timestamptz, '2026-01-05 06:27:00+00:00'::timestamptz, '2026-01-05 07:13:00+00:00'::timestamptz, '2026-01-05 07:17:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[50], '2026-01-05 06:20:00+00:00'::timestamptz, '2026-01-05 06:27:00+00:00'::timestamptz, '2026-01-05 07:13:00+00:00'::timestamptz, '2026-01-05 07:17:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[193] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[36], '2026-01-06 06:20:00+00:00'::timestamptz, '2026-01-06 06:35:00+00:00'::timestamptz, '2026-01-06 07:00:00+00:00'::timestamptz, '2026-01-06 07:14:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[36], '2026-01-06 06:20:00+00:00'::timestamptz, '2026-01-06 06:35:00+00:00'::timestamptz, '2026-01-06 07:00:00+00:00'::timestamptz, '2026-01-06 07:14:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[194] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[10], '2026-01-07 06:20:00+00:00'::timestamptz, '2026-01-07 06:22:00+00:00'::timestamptz, '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 06:52:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[10], '2026-01-07 06:20:00+00:00'::timestamptz, '2026-01-07 06:22:00+00:00'::timestamptz, '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 06:52:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[195] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[46], '2026-01-12 11:15:00+00:00'::timestamptz, '2026-01-12 11:15:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[96], journaling_object_ids[97], journaling_object_ids[46], '2026-01-12 11:15:00+00:00'::timestamptz, '2026-01-12 11:15:00+00:00'::timestamptz, '2026-01-12 12:04:00+00:00'::timestamptz, NULL, airport_ids[2]);
     flight_ids[196] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[35], '2026-01-01 06:30:00+00:00'::timestamptz, '2026-01-01 06:33:00+00:00'::timestamptz, '2026-01-01 06:56:00+00:00'::timestamptz, '2026-01-01 06:59:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[35], '2026-01-01 06:30:00+00:00'::timestamptz, '2026-01-01 06:33:00+00:00'::timestamptz, '2026-01-01 06:56:00+00:00'::timestamptz, '2026-01-01 06:59:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[197] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[31], '2026-01-02 06:30:00+00:00'::timestamptz, '2026-01-02 06:38:00+00:00'::timestamptz, '2026-01-02 07:22:00+00:00'::timestamptz, '2026-01-02 07:31:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[31], '2026-01-02 06:30:00+00:00'::timestamptz, '2026-01-02 06:38:00+00:00'::timestamptz, '2026-01-02 07:22:00+00:00'::timestamptz, '2026-01-02 07:31:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[198] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[11], '2026-01-03 06:30:00+00:00'::timestamptz, '2026-01-03 06:29:00+00:00'::timestamptz, '2026-01-03 07:22:00+00:00'::timestamptz, '2026-01-03 07:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[11], '2026-01-03 06:30:00+00:00'::timestamptz, '2026-01-03 06:29:00+00:00'::timestamptz, '2026-01-03 07:22:00+00:00'::timestamptz, '2026-01-03 07:20:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[199] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[35], '2026-01-04 06:30:00+00:00'::timestamptz, '2026-01-04 06:33:00+00:00'::timestamptz, '2026-01-04 07:08:00+00:00'::timestamptz, '2026-01-04 07:14:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[35], '2026-01-04 06:30:00+00:00'::timestamptz, '2026-01-04 06:33:00+00:00'::timestamptz, '2026-01-04 07:08:00+00:00'::timestamptz, '2026-01-04 07:14:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[200] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[31], '2026-01-05 06:30:00+00:00'::timestamptz, '2026-01-05 06:28:00+00:00'::timestamptz, '2026-01-05 07:06:00+00:00'::timestamptz, '2026-01-05 07:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[31], '2026-01-05 06:30:00+00:00'::timestamptz, '2026-01-05 06:28:00+00:00'::timestamptz, '2026-01-05 07:06:00+00:00'::timestamptz, '2026-01-05 07:07:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[201] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[41], '2026-01-06 06:30:00+00:00'::timestamptz, '2026-01-06 06:43:00+00:00'::timestamptz, '2026-01-06 07:14:00+00:00'::timestamptz, '2026-01-06 07:30:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[41], '2026-01-06 06:30:00+00:00'::timestamptz, '2026-01-06 06:43:00+00:00'::timestamptz, '2026-01-06 07:14:00+00:00'::timestamptz, '2026-01-06 07:30:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[202] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[45], '2026-01-07 06:30:00+00:00'::timestamptz, '2026-01-07 06:40:00+00:00'::timestamptz, '2026-01-07 06:57:00+00:00'::timestamptz, '2026-01-07 07:08:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[45], '2026-01-07 06:30:00+00:00'::timestamptz, '2026-01-07 06:40:00+00:00'::timestamptz, '2026-01-07 06:57:00+00:00'::timestamptz, '2026-01-07 07:08:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[203] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[20], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:49:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[98], journaling_object_ids[99], journaling_object_ids[20], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:49:00+00:00'::timestamptz, NULL, airport_ids[9]);
     flight_ids[204] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[41], '2026-01-01 06:40:00+00:00'::timestamptz, '2026-01-01 06:55:00+00:00'::timestamptz, '2026-01-01 07:12:00+00:00'::timestamptz, '2026-01-01 07:24:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[41], '2026-01-01 06:40:00+00:00'::timestamptz, '2026-01-01 06:55:00+00:00'::timestamptz, '2026-01-01 07:12:00+00:00'::timestamptz, '2026-01-01 07:24:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[205] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[11], '2026-01-02 06:40:00+00:00'::timestamptz, '2026-01-02 06:44:00+00:00'::timestamptz, '2026-01-02 07:31:00+00:00'::timestamptz, '2026-01-02 07:33:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[11], '2026-01-02 06:40:00+00:00'::timestamptz, '2026-01-02 06:44:00+00:00'::timestamptz, '2026-01-02 07:31:00+00:00'::timestamptz, '2026-01-02 07:33:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[206] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[41], '2026-01-03 06:40:00+00:00'::timestamptz, '2026-01-03 06:53:00+00:00'::timestamptz, '2026-01-03 07:21:00+00:00'::timestamptz, '2026-01-03 07:35:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[41], '2026-01-03 06:40:00+00:00'::timestamptz, '2026-01-03 06:53:00+00:00'::timestamptz, '2026-01-03 07:21:00+00:00'::timestamptz, '2026-01-03 07:35:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[207] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[26], '2026-01-04 06:40:00+00:00'::timestamptz, '2026-01-04 06:41:00+00:00'::timestamptz, '2026-01-04 07:06:00+00:00'::timestamptz, '2026-01-04 07:10:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[26], '2026-01-04 06:40:00+00:00'::timestamptz, '2026-01-04 06:41:00+00:00'::timestamptz, '2026-01-04 07:06:00+00:00'::timestamptz, '2026-01-04 07:10:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[208] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[15], '2026-01-05 06:40:00+00:00'::timestamptz, '2026-01-05 06:41:00+00:00'::timestamptz, '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[15], '2026-01-05 06:40:00+00:00'::timestamptz, '2026-01-05 06:41:00+00:00'::timestamptz, '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:34:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[209] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[46], '2026-01-06 06:40:00+00:00'::timestamptz, '2026-01-06 06:44:00+00:00'::timestamptz, '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:17:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[46], '2026-01-06 06:40:00+00:00'::timestamptz, '2026-01-06 06:44:00+00:00'::timestamptz, '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:17:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[210] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[30], '2026-01-07 06:40:00+00:00'::timestamptz, '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 07:33:00+00:00'::timestamptz, '2026-01-07 07:46:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[30], '2026-01-07 06:40:00+00:00'::timestamptz, '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 07:33:00+00:00'::timestamptz, '2026-01-07 07:46:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[211] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[16], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:31:00+00:00'::timestamptz, '2026-01-12 10:31:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[100], journaling_object_ids[101], journaling_object_ids[16], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:31:00+00:00'::timestamptz, '2026-01-12 10:31:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[212] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[45], '2026-01-01 06:50:00+00:00'::timestamptz, '2026-01-01 06:57:00+00:00'::timestamptz, '2026-01-01 07:39:00+00:00'::timestamptz, '2026-01-01 07:48:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[45], '2026-01-01 06:50:00+00:00'::timestamptz, '2026-01-01 06:57:00+00:00'::timestamptz, '2026-01-01 07:39:00+00:00'::timestamptz, '2026-01-01 07:48:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[213] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[11], '2026-01-02 06:50:00+00:00'::timestamptz, '2026-01-02 06:55:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, '2026-01-02 07:49:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[11], '2026-01-02 06:50:00+00:00'::timestamptz, '2026-01-02 06:55:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, '2026-01-02 07:49:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[214] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[50], '2026-01-03 06:50:00+00:00'::timestamptz, '2026-01-03 07:01:00+00:00'::timestamptz, '2026-01-03 07:25:00+00:00'::timestamptz, '2026-01-03 07:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[50], '2026-01-03 06:50:00+00:00'::timestamptz, '2026-01-03 07:01:00+00:00'::timestamptz, '2026-01-03 07:25:00+00:00'::timestamptz, '2026-01-03 07:34:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[215] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[10], '2026-01-04 06:50:00+00:00'::timestamptz, '2026-01-04 06:52:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[10], '2026-01-04 06:50:00+00:00'::timestamptz, '2026-01-04 06:52:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[216] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[40], '2026-01-05 06:50:00+00:00'::timestamptz, '2026-01-05 06:54:00+00:00'::timestamptz, '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:32:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[40], '2026-01-05 06:50:00+00:00'::timestamptz, '2026-01-05 06:54:00+00:00'::timestamptz, '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:32:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[217] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[35], '2026-01-06 06:50:00+00:00'::timestamptz, '2026-01-06 06:53:00+00:00'::timestamptz, '2026-01-06 07:36:00+00:00'::timestamptz, '2026-01-06 07:36:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[35], '2026-01-06 06:50:00+00:00'::timestamptz, '2026-01-06 06:53:00+00:00'::timestamptz, '2026-01-06 07:36:00+00:00'::timestamptz, '2026-01-06 07:36:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[218] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[11], '2026-01-07 06:50:00+00:00'::timestamptz, '2026-01-07 06:52:00+00:00'::timestamptz, '2026-01-07 07:24:00+00:00'::timestamptz, '2026-01-07 07:24:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[11], '2026-01-07 06:50:00+00:00'::timestamptz, '2026-01-07 06:52:00+00:00'::timestamptz, '2026-01-07 07:24:00+00:00'::timestamptz, '2026-01-07 07:24:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[219] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[31], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:38:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[102], journaling_object_ids[103], journaling_object_ids[31], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:38:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[220] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[50], '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 06:59:00+00:00'::timestamptz, '2026-01-01 07:51:00+00:00'::timestamptz, '2026-01-01 07:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[50], '2026-01-01 07:00:00+00:00'::timestamptz, '2026-01-01 06:59:00+00:00'::timestamptz, '2026-01-01 07:51:00+00:00'::timestamptz, '2026-01-01 07:50:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[221] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[30], '2026-01-02 07:00:00+00:00'::timestamptz, '2026-01-02 07:02:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, '2026-01-02 07:43:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[30], '2026-01-02 07:00:00+00:00'::timestamptz, '2026-01-02 07:02:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, '2026-01-02 07:43:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[222] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[10], '2026-01-03 07:00:00+00:00'::timestamptz, '2026-01-03 07:12:00+00:00'::timestamptz, '2026-01-03 07:43:00+00:00'::timestamptz, '2026-01-03 07:53:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[10], '2026-01-03 07:00:00+00:00'::timestamptz, '2026-01-03 07:12:00+00:00'::timestamptz, '2026-01-03 07:43:00+00:00'::timestamptz, '2026-01-03 07:53:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[223] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[30], '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 07:11:00+00:00'::timestamptz, '2026-01-04 07:34:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[30], '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 07:11:00+00:00'::timestamptz, '2026-01-04 07:34:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[224] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[10], '2026-01-05 07:00:00+00:00'::timestamptz, '2026-01-05 07:07:00+00:00'::timestamptz, '2026-01-05 07:25:00+00:00'::timestamptz, '2026-01-05 07:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[10], '2026-01-05 07:00:00+00:00'::timestamptz, '2026-01-05 07:07:00+00:00'::timestamptz, '2026-01-05 07:25:00+00:00'::timestamptz, '2026-01-05 07:34:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[225] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[21], '2026-01-06 07:00:00+00:00'::timestamptz, '2026-01-06 07:11:00+00:00'::timestamptz, '2026-01-06 07:32:00+00:00'::timestamptz, '2026-01-06 07:44:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[21], '2026-01-06 07:00:00+00:00'::timestamptz, '2026-01-06 07:11:00+00:00'::timestamptz, '2026-01-06 07:32:00+00:00'::timestamptz, '2026-01-06 07:44:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[226] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[50], '2026-01-07 07:00:00+00:00'::timestamptz, '2026-01-07 07:15:00+00:00'::timestamptz, '2026-01-07 07:51:00+00:00'::timestamptz, '2026-01-07 08:03:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[50], '2026-01-07 07:00:00+00:00'::timestamptz, '2026-01-07 07:15:00+00:00'::timestamptz, '2026-01-07 07:51:00+00:00'::timestamptz, '2026-01-07 08:03:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[227] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[25], '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 12:02:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[104], journaling_object_ids[105], journaling_object_ids[25], '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 11:16:00+00:00'::timestamptz, '2026-01-12 12:02:00+00:00'::timestamptz, NULL, airport_ids[1]);
     flight_ids[228] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[11], '2026-01-01 07:10:00+00:00'::timestamptz, '2026-01-01 07:15:00+00:00'::timestamptz, '2026-01-01 07:40:00+00:00'::timestamptz, '2026-01-01 07:45:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[11], '2026-01-01 07:10:00+00:00'::timestamptz, '2026-01-01 07:15:00+00:00'::timestamptz, '2026-01-01 07:40:00+00:00'::timestamptz, '2026-01-01 07:45:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[229] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[21], '2026-01-02 07:10:00+00:00'::timestamptz, '2026-01-02 07:09:00+00:00'::timestamptz, '2026-01-02 07:58:00+00:00'::timestamptz, '2026-01-02 07:56:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[21], '2026-01-02 07:10:00+00:00'::timestamptz, '2026-01-02 07:09:00+00:00'::timestamptz, '2026-01-02 07:58:00+00:00'::timestamptz, '2026-01-02 07:56:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[230] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[35], '2026-01-03 07:10:00+00:00'::timestamptz, '2026-01-03 07:22:00+00:00'::timestamptz, '2026-01-03 07:40:00+00:00'::timestamptz, '2026-01-03 07:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[35], '2026-01-03 07:10:00+00:00'::timestamptz, '2026-01-03 07:22:00+00:00'::timestamptz, '2026-01-03 07:40:00+00:00'::timestamptz, '2026-01-03 07:50:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[231] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[50], '2026-01-04 07:10:00+00:00'::timestamptz, '2026-01-04 07:19:00+00:00'::timestamptz, '2026-01-04 08:01:00+00:00'::timestamptz, '2026-01-04 08:13:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[50], '2026-01-04 07:10:00+00:00'::timestamptz, '2026-01-04 07:19:00+00:00'::timestamptz, '2026-01-04 08:01:00+00:00'::timestamptz, '2026-01-04 08:13:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[232] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[21], '2026-01-05 07:10:00+00:00'::timestamptz, '2026-01-05 07:18:00+00:00'::timestamptz, '2026-01-05 08:01:00+00:00'::timestamptz, '2026-01-05 08:08:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[21], '2026-01-05 07:10:00+00:00'::timestamptz, '2026-01-05 07:18:00+00:00'::timestamptz, '2026-01-05 08:01:00+00:00'::timestamptz, '2026-01-05 08:08:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[233] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[16], '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:11:00+00:00'::timestamptz, '2026-01-06 07:41:00+00:00'::timestamptz, '2026-01-06 07:40:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[16], '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:11:00+00:00'::timestamptz, '2026-01-06 07:41:00+00:00'::timestamptz, '2026-01-06 07:40:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[234] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[40], '2026-01-07 07:10:00+00:00'::timestamptz, '2026-01-07 07:07:00+00:00'::timestamptz, '2026-01-07 07:59:00+00:00'::timestamptz, '2026-01-07 07:56:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[40], '2026-01-07 07:10:00+00:00'::timestamptz, '2026-01-07 07:07:00+00:00'::timestamptz, '2026-01-07 07:59:00+00:00'::timestamptz, '2026-01-07 07:56:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[235] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[46], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:51:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[106], journaling_object_ids[107], journaling_object_ids[46], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:51:00+00:00'::timestamptz, NULL, airport_ids[4]);
     flight_ids[236] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[15], '2026-01-01 07:20:00+00:00'::timestamptz, '2026-01-01 07:24:00+00:00'::timestamptz, '2026-01-01 07:55:00+00:00'::timestamptz, '2026-01-01 08:01:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[15], '2026-01-01 07:20:00+00:00'::timestamptz, '2026-01-01 07:24:00+00:00'::timestamptz, '2026-01-01 07:55:00+00:00'::timestamptz, '2026-01-01 08:01:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[237] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[21], '2026-01-02 07:20:00+00:00'::timestamptz, '2026-01-02 07:24:00+00:00'::timestamptz, '2026-01-02 07:55:00+00:00'::timestamptz, '2026-01-02 08:01:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[21], '2026-01-02 07:20:00+00:00'::timestamptz, '2026-01-02 07:24:00+00:00'::timestamptz, '2026-01-02 07:55:00+00:00'::timestamptz, '2026-01-02 08:01:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[238] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[11], '2026-01-03 07:20:00+00:00'::timestamptz, '2026-01-03 07:24:00+00:00'::timestamptz, '2026-01-03 07:47:00+00:00'::timestamptz, '2026-01-03 07:53:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[11], '2026-01-03 07:20:00+00:00'::timestamptz, '2026-01-03 07:24:00+00:00'::timestamptz, '2026-01-03 07:47:00+00:00'::timestamptz, '2026-01-03 07:53:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[239] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[46], '2026-01-04 07:20:00+00:00'::timestamptz, '2026-01-04 07:34:00+00:00'::timestamptz, '2026-01-04 07:46:00+00:00'::timestamptz, '2026-01-04 08:00:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[46], '2026-01-04 07:20:00+00:00'::timestamptz, '2026-01-04 07:34:00+00:00'::timestamptz, '2026-01-04 07:46:00+00:00'::timestamptz, '2026-01-04 08:00:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[240] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[41], '2026-01-05 07:20:00+00:00'::timestamptz, '2026-01-05 07:17:00+00:00'::timestamptz, '2026-01-05 08:05:00+00:00'::timestamptz, '2026-01-05 08:00:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[41], '2026-01-05 07:20:00+00:00'::timestamptz, '2026-01-05 07:17:00+00:00'::timestamptz, '2026-01-05 08:05:00+00:00'::timestamptz, '2026-01-05 08:00:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[241] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[15], '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 07:22:00+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz, '2026-01-06 08:02:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[15], '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 07:22:00+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz, '2026-01-06 08:02:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[242] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[11], '2026-01-07 07:20:00+00:00'::timestamptz, '2026-01-07 07:19:00+00:00'::timestamptz, '2026-01-07 07:55:00+00:00'::timestamptz, '2026-01-07 07:51:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[11], '2026-01-07 07:20:00+00:00'::timestamptz, '2026-01-07 07:19:00+00:00'::timestamptz, '2026-01-07 07:55:00+00:00'::timestamptz, '2026-01-07 07:51:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[243] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[51], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:39:00+00:00'::timestamptz, '2026-01-12 10:37:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[108], journaling_object_ids[109], journaling_object_ids[51], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:39:00+00:00'::timestamptz, '2026-01-12 10:37:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[244] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[21], '2026-01-01 07:30:00+00:00'::timestamptz, '2026-01-01 07:38:00+00:00'::timestamptz, '2026-01-01 08:22:00+00:00'::timestamptz, '2026-01-01 08:29:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[21], '2026-01-01 07:30:00+00:00'::timestamptz, '2026-01-01 07:38:00+00:00'::timestamptz, '2026-01-01 08:22:00+00:00'::timestamptz, '2026-01-01 08:29:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[245] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[11], '2026-01-02 07:30:00+00:00'::timestamptz, '2026-01-02 07:45:00+00:00'::timestamptz, '2026-01-02 08:21:00+00:00'::timestamptz, '2026-01-02 08:38:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[11], '2026-01-02 07:30:00+00:00'::timestamptz, '2026-01-02 07:45:00+00:00'::timestamptz, '2026-01-02 08:21:00+00:00'::timestamptz, '2026-01-02 08:38:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[246] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[16], '2026-01-03 07:30:00+00:00'::timestamptz, '2026-01-03 07:29:00+00:00'::timestamptz, '2026-01-03 08:24:00+00:00'::timestamptz, '2026-01-03 08:21:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[16], '2026-01-03 07:30:00+00:00'::timestamptz, '2026-01-03 07:29:00+00:00'::timestamptz, '2026-01-03 08:24:00+00:00'::timestamptz, '2026-01-03 08:21:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[247] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[51], '2026-01-04 07:30:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz, '2026-01-04 08:22:00+00:00'::timestamptz, '2026-01-04 08:35:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[51], '2026-01-04 07:30:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz, '2026-01-04 08:22:00+00:00'::timestamptz, '2026-01-04 08:35:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[248] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[26], '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:42:00+00:00'::timestamptz, '2026-01-05 08:07:00+00:00'::timestamptz, '2026-01-05 08:16:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[26], '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:42:00+00:00'::timestamptz, '2026-01-05 08:07:00+00:00'::timestamptz, '2026-01-05 08:16:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[249] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[35], '2026-01-06 07:30:00+00:00'::timestamptz, '2026-01-06 07:34:00+00:00'::timestamptz, '2026-01-06 08:11:00+00:00'::timestamptz, '2026-01-06 08:17:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[35], '2026-01-06 07:30:00+00:00'::timestamptz, '2026-01-06 07:34:00+00:00'::timestamptz, '2026-01-06 08:11:00+00:00'::timestamptz, '2026-01-06 08:17:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[250] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[40], '2026-01-07 07:30:00+00:00'::timestamptz, '2026-01-07 07:35:00+00:00'::timestamptz, '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:24:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[40], '2026-01-07 07:30:00+00:00'::timestamptz, '2026-01-07 07:35:00+00:00'::timestamptz, '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:24:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[251] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[11], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:31:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[110], journaling_object_ids[111], journaling_object_ids[11], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:31:00+00:00'::timestamptz, NULL, airport_ids[5]);
     flight_ids[252] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[26], '2026-01-01 07:40:00+00:00'::timestamptz, '2026-01-01 07:42:00+00:00'::timestamptz, '2026-01-01 08:28:00+00:00'::timestamptz, '2026-01-01 08:29:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[26], '2026-01-01 07:40:00+00:00'::timestamptz, '2026-01-01 07:42:00+00:00'::timestamptz, '2026-01-01 08:28:00+00:00'::timestamptz, '2026-01-01 08:29:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[253] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[40], '2026-01-02 07:40:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, '2026-01-02 08:31:00+00:00'::timestamptz, '2026-01-02 08:33:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[40], '2026-01-02 07:40:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, '2026-01-02 08:31:00+00:00'::timestamptz, '2026-01-02 08:33:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[254] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[11], '2026-01-03 07:40:00+00:00'::timestamptz, '2026-01-03 07:37:00+00:00'::timestamptz, '2026-01-03 08:31:00+00:00'::timestamptz, '2026-01-03 08:27:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[11], '2026-01-03 07:40:00+00:00'::timestamptz, '2026-01-03 07:37:00+00:00'::timestamptz, '2026-01-03 08:31:00+00:00'::timestamptz, '2026-01-03 08:27:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[255] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[16], '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:44:00+00:00'::timestamptz, '2026-01-04 08:23:00+00:00'::timestamptz, '2026-01-04 08:25:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[16], '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:44:00+00:00'::timestamptz, '2026-01-04 08:23:00+00:00'::timestamptz, '2026-01-04 08:25:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[256] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[50], '2026-01-05 07:40:00+00:00'::timestamptz, '2026-01-05 07:49:00+00:00'::timestamptz, '2026-01-05 08:25:00+00:00'::timestamptz, '2026-01-05 08:36:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[50], '2026-01-05 07:40:00+00:00'::timestamptz, '2026-01-05 07:49:00+00:00'::timestamptz, '2026-01-05 08:25:00+00:00'::timestamptz, '2026-01-05 08:36:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[257] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[11], '2026-01-06 07:40:00+00:00'::timestamptz, '2026-01-06 07:49:00+00:00'::timestamptz, '2026-01-06 08:31:00+00:00'::timestamptz, '2026-01-06 08:40:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[11], '2026-01-06 07:40:00+00:00'::timestamptz, '2026-01-06 07:49:00+00:00'::timestamptz, '2026-01-06 08:31:00+00:00'::timestamptz, '2026-01-06 08:40:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[258] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[15], '2026-01-07 07:40:00+00:00'::timestamptz, '2026-01-07 07:52:00+00:00'::timestamptz, '2026-01-07 08:08:00+00:00'::timestamptz, '2026-01-07 08:20:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[15], '2026-01-07 07:40:00+00:00'::timestamptz, '2026-01-07 07:52:00+00:00'::timestamptz, '2026-01-07 08:08:00+00:00'::timestamptz, '2026-01-07 08:20:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[259] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[11], '2026-01-12 11:12:00+00:00'::timestamptz, '2026-01-12 11:12:00+00:00'::timestamptz, '2026-01-12 12:03:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[112], journaling_object_ids[113], journaling_object_ids[11], '2026-01-12 11:12:00+00:00'::timestamptz, '2026-01-12 11:12:00+00:00'::timestamptz, '2026-01-12 12:03:00+00:00'::timestamptz, NULL, airport_ids[9]);
     flight_ids[260] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[31], '2026-01-01 07:50:00+00:00'::timestamptz, '2026-01-01 07:49:00+00:00'::timestamptz, '2026-01-01 08:27:00+00:00'::timestamptz, '2026-01-01 08:29:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[31], '2026-01-01 07:50:00+00:00'::timestamptz, '2026-01-01 07:49:00+00:00'::timestamptz, '2026-01-01 08:27:00+00:00'::timestamptz, '2026-01-01 08:29:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[261] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[15], '2026-01-02 07:50:00+00:00'::timestamptz, '2026-01-02 08:04:00+00:00'::timestamptz, '2026-01-02 08:44:00+00:00'::timestamptz, '2026-01-02 08:57:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[15], '2026-01-02 07:50:00+00:00'::timestamptz, '2026-01-02 08:04:00+00:00'::timestamptz, '2026-01-02 08:44:00+00:00'::timestamptz, '2026-01-02 08:57:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[262] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[36], '2026-01-03 07:50:00+00:00'::timestamptz, '2026-01-03 08:01:00+00:00'::timestamptz, '2026-01-03 08:32:00+00:00'::timestamptz, '2026-01-03 08:41:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[36], '2026-01-03 07:50:00+00:00'::timestamptz, '2026-01-03 08:01:00+00:00'::timestamptz, '2026-01-03 08:32:00+00:00'::timestamptz, '2026-01-03 08:41:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[263] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[15], '2026-01-04 07:50:00+00:00'::timestamptz, '2026-01-04 07:50:00+00:00'::timestamptz, '2026-01-04 08:25:00+00:00'::timestamptz, '2026-01-04 08:28:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[15], '2026-01-04 07:50:00+00:00'::timestamptz, '2026-01-04 07:50:00+00:00'::timestamptz, '2026-01-04 08:25:00+00:00'::timestamptz, '2026-01-04 08:28:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[264] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[50], '2026-01-05 07:50:00+00:00'::timestamptz, '2026-01-05 07:50:00+00:00'::timestamptz, '2026-01-05 08:40:00+00:00'::timestamptz, '2026-01-05 08:43:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[50], '2026-01-05 07:50:00+00:00'::timestamptz, '2026-01-05 07:50:00+00:00'::timestamptz, '2026-01-05 08:40:00+00:00'::timestamptz, '2026-01-05 08:43:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[265] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[15], '2026-01-06 07:50:00+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, '2026-01-06 08:45:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[15], '2026-01-06 07:50:00+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, '2026-01-06 08:45:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[266] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[30], '2026-01-07 07:50:00+00:00'::timestamptz, '2026-01-07 07:47:00+00:00'::timestamptz, '2026-01-07 08:27:00+00:00'::timestamptz, '2026-01-07 08:24:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[30], '2026-01-07 07:50:00+00:00'::timestamptz, '2026-01-07 07:47:00+00:00'::timestamptz, '2026-01-07 08:27:00+00:00'::timestamptz, '2026-01-07 08:24:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[267] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[46], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:24:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[114], journaling_object_ids[115], journaling_object_ids[46], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:24:00+00:00'::timestamptz, NULL, airport_ids[2]);
     flight_ids[268] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[36], '2026-01-01 08:00:00+00:00'::timestamptz, '2026-01-01 08:12:00+00:00'::timestamptz, '2026-01-01 08:40:00+00:00'::timestamptz, '2026-01-01 08:54:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[36], '2026-01-01 08:00:00+00:00'::timestamptz, '2026-01-01 08:12:00+00:00'::timestamptz, '2026-01-01 08:40:00+00:00'::timestamptz, '2026-01-01 08:54:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[269] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[11], '2026-01-02 08:00:00+00:00'::timestamptz, '2026-01-02 08:00:00+00:00'::timestamptz, '2026-01-02 08:33:00+00:00'::timestamptz, '2026-01-02 08:35:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[11], '2026-01-02 08:00:00+00:00'::timestamptz, '2026-01-02 08:00:00+00:00'::timestamptz, '2026-01-02 08:33:00+00:00'::timestamptz, '2026-01-02 08:35:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[270] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[20], '2026-01-03 08:00:00+00:00'::timestamptz, '2026-01-03 07:57:00+00:00'::timestamptz, '2026-01-03 08:39:00+00:00'::timestamptz, '2026-01-03 08:38:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[20], '2026-01-03 08:00:00+00:00'::timestamptz, '2026-01-03 07:57:00+00:00'::timestamptz, '2026-01-03 08:39:00+00:00'::timestamptz, '2026-01-03 08:38:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[271] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[50], '2026-01-04 08:00:00+00:00'::timestamptz, '2026-01-04 08:06:00+00:00'::timestamptz, '2026-01-04 08:35:00+00:00'::timestamptz, '2026-01-04 08:38:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[50], '2026-01-04 08:00:00+00:00'::timestamptz, '2026-01-04 08:06:00+00:00'::timestamptz, '2026-01-04 08:35:00+00:00'::timestamptz, '2026-01-04 08:38:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[272] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[11], '2026-01-05 08:00:00+00:00'::timestamptz, '2026-01-05 07:59:00+00:00'::timestamptz, '2026-01-05 08:40:00+00:00'::timestamptz, '2026-01-05 08:42:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[11], '2026-01-05 08:00:00+00:00'::timestamptz, '2026-01-05 07:59:00+00:00'::timestamptz, '2026-01-05 08:40:00+00:00'::timestamptz, '2026-01-05 08:42:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[273] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[45], '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 08:13:00+00:00'::timestamptz, '2026-01-06 08:33:00+00:00'::timestamptz, '2026-01-06 08:43:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[45], '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 08:13:00+00:00'::timestamptz, '2026-01-06 08:33:00+00:00'::timestamptz, '2026-01-06 08:43:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[274] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[11], '2026-01-07 08:00:00+00:00'::timestamptz, '2026-01-07 08:09:00+00:00'::timestamptz, '2026-01-07 08:34:00+00:00'::timestamptz, '2026-01-07 08:45:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[11], '2026-01-07 08:00:00+00:00'::timestamptz, '2026-01-07 08:09:00+00:00'::timestamptz, '2026-01-07 08:34:00+00:00'::timestamptz, '2026-01-07 08:45:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[275] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[20], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:31:00+00:00'::timestamptz, '2026-01-12 10:29:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[116], journaling_object_ids[117], journaling_object_ids[20], '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:00:00+00:00'::timestamptz, '2026-01-12 10:31:00+00:00'::timestamptz, '2026-01-12 10:29:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[276] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[41], '2026-01-01 08:10:00+00:00'::timestamptz, '2026-01-01 08:20:00+00:00'::timestamptz, '2026-01-01 09:06:00+00:00'::timestamptz, '2026-01-01 09:15:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[41], '2026-01-01 08:10:00+00:00'::timestamptz, '2026-01-01 08:20:00+00:00'::timestamptz, '2026-01-01 09:06:00+00:00'::timestamptz, '2026-01-01 09:15:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[277] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[51], '2026-01-02 08:10:00+00:00'::timestamptz, '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:34:00+00:00'::timestamptz, '2026-01-02 08:45:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[51], '2026-01-02 08:10:00+00:00'::timestamptz, '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:34:00+00:00'::timestamptz, '2026-01-02 08:45:00+00:00'::timestamptz, airport_ids[3]);
     flight_ids[278] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[20], '2026-01-03 08:10:00+00:00'::timestamptz, '2026-01-03 08:17:00+00:00'::timestamptz, '2026-01-03 08:43:00+00:00'::timestamptz, '2026-01-03 08:50:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[20], '2026-01-03 08:10:00+00:00'::timestamptz, '2026-01-03 08:17:00+00:00'::timestamptz, '2026-01-03 08:43:00+00:00'::timestamptz, '2026-01-03 08:50:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[279] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[15], '2026-01-04 08:10:00+00:00'::timestamptz, '2026-01-04 08:15:00+00:00'::timestamptz, '2026-01-04 09:04:00+00:00'::timestamptz, '2026-01-04 09:08:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[15], '2026-01-04 08:10:00+00:00'::timestamptz, '2026-01-04 08:15:00+00:00'::timestamptz, '2026-01-04 09:04:00+00:00'::timestamptz, '2026-01-04 09:08:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[280] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[10], '2026-01-05 08:10:00+00:00'::timestamptz, '2026-01-05 08:07:00+00:00'::timestamptz, '2026-01-05 09:08:00+00:00'::timestamptz, '2026-01-05 09:02:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[10], '2026-01-05 08:10:00+00:00'::timestamptz, '2026-01-05 08:07:00+00:00'::timestamptz, '2026-01-05 09:08:00+00:00'::timestamptz, '2026-01-05 09:02:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[281] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[40], '2026-01-06 08:10:00+00:00'::timestamptz, '2026-01-06 08:17:00+00:00'::timestamptz, '2026-01-06 08:51:00+00:00'::timestamptz, '2026-01-06 08:55:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[40], '2026-01-06 08:10:00+00:00'::timestamptz, '2026-01-06 08:17:00+00:00'::timestamptz, '2026-01-06 08:51:00+00:00'::timestamptz, '2026-01-06 08:55:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[282] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[35], '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 09:00:00+00:00'::timestamptz, '2026-01-07 09:03:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[35], '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 08:10:00+00:00'::timestamptz, '2026-01-07 09:00:00+00:00'::timestamptz, '2026-01-07 09:03:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[283] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[25], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:34:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[118], journaling_object_ids[119], journaling_object_ids[25], '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 11:50:00+00:00'::timestamptz, '2026-01-12 12:34:00+00:00'::timestamptz, NULL, airport_ids[7]);
     flight_ids[284] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[46], '2026-01-01 08:20:00+00:00'::timestamptz, '2026-01-01 08:33:00+00:00'::timestamptz, '2026-01-01 09:11:00+00:00'::timestamptz, '2026-01-01 09:22:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[46], '2026-01-01 08:20:00+00:00'::timestamptz, '2026-01-01 08:33:00+00:00'::timestamptz, '2026-01-01 09:11:00+00:00'::timestamptz, '2026-01-01 09:22:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[285] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[26], '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:32:00+00:00'::timestamptz, '2026-01-02 08:50:00+00:00'::timestamptz, '2026-01-02 09:05:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[26], '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:32:00+00:00'::timestamptz, '2026-01-02 08:50:00+00:00'::timestamptz, '2026-01-02 09:05:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[286] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[46], '2026-01-03 08:20:00+00:00'::timestamptz, '2026-01-03 08:25:00+00:00'::timestamptz, '2026-01-03 09:11:00+00:00'::timestamptz, '2026-01-03 09:19:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[46], '2026-01-03 08:20:00+00:00'::timestamptz, '2026-01-03 08:25:00+00:00'::timestamptz, '2026-01-03 09:11:00+00:00'::timestamptz, '2026-01-03 09:19:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[287] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[40], '2026-01-04 08:20:00+00:00'::timestamptz, '2026-01-04 08:21:00+00:00'::timestamptz, '2026-01-04 08:53:00+00:00'::timestamptz, '2026-01-04 08:53:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[40], '2026-01-04 08:20:00+00:00'::timestamptz, '2026-01-04 08:21:00+00:00'::timestamptz, '2026-01-04 08:53:00+00:00'::timestamptz, '2026-01-04 08:53:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[288] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[10], '2026-01-05 08:20:00+00:00'::timestamptz, '2026-01-05 08:35:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz, '2026-01-05 09:07:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[10], '2026-01-05 08:20:00+00:00'::timestamptz, '2026-01-05 08:35:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz, '2026-01-05 09:07:00+00:00'::timestamptz, airport_ids[2]);
     flight_ids[289] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[16], '2026-01-06 08:20:00+00:00'::timestamptz, '2026-01-06 08:27:00+00:00'::timestamptz, '2026-01-06 09:10:00+00:00'::timestamptz, '2026-01-06 09:15:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[16], '2026-01-06 08:20:00+00:00'::timestamptz, '2026-01-06 08:27:00+00:00'::timestamptz, '2026-01-06 09:10:00+00:00'::timestamptz, '2026-01-06 09:15:00+00:00'::timestamptz, airport_ids[8]);
     flight_ids[290] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[45], '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:18:00+00:00'::timestamptz, '2026-01-07 09:17:00+00:00'::timestamptz, '2026-01-07 09:13:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[45], '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:18:00+00:00'::timestamptz, '2026-01-07 09:17:00+00:00'::timestamptz, '2026-01-07 09:13:00+00:00'::timestamptz, airport_ids[6]);
     flight_ids[291] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[35], '2026-01-12 11:09:00+00:00'::timestamptz, '2026-01-12 11:09:00+00:00'::timestamptz, '2026-01-12 12:02:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[120], journaling_object_ids[121], journaling_object_ids[35], '2026-01-12 11:09:00+00:00'::timestamptz, '2026-01-12 11:09:00+00:00'::timestamptz, '2026-01-12 12:02:00+00:00'::timestamptz, NULL, airport_ids[7]);
     flight_ids[292] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[51], '2026-01-01 08:30:00+00:00'::timestamptz, '2026-01-01 08:44:00+00:00'::timestamptz, '2026-01-01 09:02:00+00:00'::timestamptz, '2026-01-01 09:19:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[51], '2026-01-01 08:30:00+00:00'::timestamptz, '2026-01-01 08:44:00+00:00'::timestamptz, '2026-01-01 09:02:00+00:00'::timestamptz, '2026-01-01 09:19:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[293] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[11], '2026-01-02 08:30:00+00:00'::timestamptz, '2026-01-02 08:45:00+00:00'::timestamptz, '2026-01-02 09:17:00+00:00'::timestamptz, '2026-01-02 09:34:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[11], '2026-01-02 08:30:00+00:00'::timestamptz, '2026-01-02 08:45:00+00:00'::timestamptz, '2026-01-02 09:17:00+00:00'::timestamptz, '2026-01-02 09:34:00+00:00'::timestamptz, airport_ids[5]);
     flight_ids[294] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[31], '2026-01-03 08:30:00+00:00'::timestamptz, '2026-01-03 08:36:00+00:00'::timestamptz, '2026-01-03 09:15:00+00:00'::timestamptz, '2026-01-03 09:19:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[31], '2026-01-03 08:30:00+00:00'::timestamptz, '2026-01-03 08:36:00+00:00'::timestamptz, '2026-01-03 09:15:00+00:00'::timestamptz, '2026-01-03 09:19:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[295] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[25], '2026-01-04 08:30:00+00:00'::timestamptz, '2026-01-04 08:32:00+00:00'::timestamptz, '2026-01-04 09:20:00+00:00'::timestamptz, '2026-01-04 09:24:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[25], '2026-01-04 08:30:00+00:00'::timestamptz, '2026-01-04 08:32:00+00:00'::timestamptz, '2026-01-04 09:20:00+00:00'::timestamptz, '2026-01-04 09:24:00+00:00'::timestamptz, airport_ids[1]);
     flight_ids[296] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[11], '2026-01-05 08:30:00+00:00'::timestamptz, '2026-01-05 08:30:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz, '2026-01-05 08:55:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[11], '2026-01-05 08:30:00+00:00'::timestamptz, '2026-01-05 08:30:00+00:00'::timestamptz, '2026-01-05 08:54:00+00:00'::timestamptz, '2026-01-05 08:55:00+00:00'::timestamptz, airport_ids[4]);
     flight_ids[297] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[26], '2026-01-06 08:30:00+00:00'::timestamptz, '2026-01-06 08:44:00+00:00'::timestamptz, '2026-01-06 09:10:00+00:00'::timestamptz, '2026-01-06 09:22:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[26], '2026-01-06 08:30:00+00:00'::timestamptz, '2026-01-06 08:44:00+00:00'::timestamptz, '2026-01-06 09:10:00+00:00'::timestamptz, '2026-01-06 09:22:00+00:00'::timestamptz, airport_ids[9]);
     flight_ids[298] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[51], '2026-01-07 08:30:00+00:00'::timestamptz, '2026-01-07 08:36:00+00:00'::timestamptz, '2026-01-07 09:07:00+00:00'::timestamptz, '2026-01-07 09:12:00+00:00'::timestamptz);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[51], '2026-01-07 08:30:00+00:00'::timestamptz, '2026-01-07 08:36:00+00:00'::timestamptz, '2026-01-07 09:07:00+00:00'::timestamptz, '2026-01-07 09:12:00+00:00'::timestamptz, airport_ids[7]);
     flight_ids[299] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[41], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:29:00+00:00'::timestamptz, NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[122], journaling_object_ids[123], journaling_object_ids[41], '2026-01-12 13:00:00+00:00'::timestamptz, NULL, '2026-01-12 13:29:00+00:00'::timestamptz, NULL, airport_ids[2]);
     flight_ids[300] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
     INSERT INTO passenger (firstname, lastname, middle_name, birthdate, passport_data, country) VALUES
@@ -41526,6 +41532,853 @@ BEGIN
         (journaling_object_ids[122], 57.0380901, 40.9759709, 380.15,  -4.504, 175.263, 35.94, '2026-01-07 09:11:30+00:00'::timestamptz),
         (journaling_object_ids[122], 57.0284261, 40.9774422, 295.17,  -4.508, 175.263, 35.94, '2026-01-07 09:12:00+00:00'::timestamptz),
         (journaling_object_ids[122], 57.0284261, 40.9774422, 295.17, 0, 0, 0, '2026-01-12 12:00:00+00:00'::timestamptz);
+
+    INSERT INTO runway_usage (line_id, flight_id, operation_type, assigned_at, occupied_at, released_at) VALUES
+        (journaling_object_ids[10], flight_ids[1], 'takeoff', '2026-01-01 06:04:00+00:00'::timestamptz, '2026-01-01 06:06:00+00:00'::timestamptz, '2026-01-01 06:08:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[1], 'landing', '2026-01-01 06:54:00+00:00'::timestamptz, '2026-01-01 06:57:30+00:00'::timestamptz, '2026-01-01 06:58:45+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[2], 'takeoff', '2026-01-02 05:59:00+00:00'::timestamptz, '2026-01-02 06:01:00+00:00'::timestamptz, '2026-01-02 06:04:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[2], 'landing', '2026-01-02 06:38:00+00:00'::timestamptz, '2026-01-02 06:41:30+00:00'::timestamptz, '2026-01-02 06:43:00+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[3], 'takeoff', '2026-01-03 06:05:00+00:00'::timestamptz, '2026-01-03 06:07:00+00:00'::timestamptz, '2026-01-03 06:08:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[3], 'landing', '2026-01-03 06:48:00+00:00'::timestamptz, '2026-01-03 06:51:30+00:00'::timestamptz, '2026-01-03 06:53:15+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[4], 'takeoff', '2026-01-04 06:05:00+00:00'::timestamptz, '2026-01-04 06:07:00+00:00'::timestamptz, '2026-01-04 06:09:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[4], 'landing', '2026-01-04 06:46:00+00:00'::timestamptz, '2026-01-04 06:49:30+00:00'::timestamptz, '2026-01-04 06:50:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[5], 'takeoff', '2026-01-05 06:04:00+00:00'::timestamptz, '2026-01-05 06:06:00+00:00'::timestamptz, '2026-01-05 06:09:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[5], 'landing', '2026-01-05 06:48:00+00:00'::timestamptz, '2026-01-05 06:51:30+00:00'::timestamptz, '2026-01-05 06:52:45+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[6], 'takeoff', '2026-01-06 06:06:00+00:00'::timestamptz, '2026-01-06 06:08:00+00:00'::timestamptz, '2026-01-06 06:09:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[6], 'landing', '2026-01-06 06:31:00+00:00'::timestamptz, '2026-01-06 06:34:30+00:00'::timestamptz, '2026-01-06 06:36:00+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[7], 'takeoff', '2026-01-07 06:09:00+00:00'::timestamptz, '2026-01-07 06:11:00+00:00'::timestamptz, '2026-01-07 06:13:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[7], 'landing', '2026-01-07 07:03:00+00:00'::timestamptz, '2026-01-07 07:06:30+00:00'::timestamptz, '2026-01-07 07:08:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[8], 'takeoff', '2026-01-08 06:09:00+00:00'::timestamptz, '2026-01-08 06:11:00+00:00'::timestamptz, '2026-01-08 06:14:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[8], 'landing', '2026-01-08 06:57:00+00:00'::timestamptz, '2026-01-08 07:00:30+00:00'::timestamptz, '2026-01-08 07:01:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[9], 'takeoff', '2026-01-12 09:57:00+00:00'::timestamptz, '2026-01-12 09:59:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[9], 'landing', '2026-01-12 10:28:00+00:00'::timestamptz, '2026-01-12 10:31:30+00:00'::timestamptz, '2026-01-12 10:32:45+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[10], 'takeoff', '2026-01-01 06:17:00+00:00'::timestamptz, '2026-01-01 06:19:00+00:00'::timestamptz, '2026-01-01 06:21:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[10], 'landing', '2026-01-01 06:45:00+00:00'::timestamptz, '2026-01-01 06:48:30+00:00'::timestamptz, '2026-01-01 06:50:00+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[11], 'takeoff', '2026-01-02 06:02:00+00:00'::timestamptz, '2026-01-02 06:04:00+00:00'::timestamptz, '2026-01-02 06:07:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[11], 'landing', '2026-01-02 06:50:00+00:00'::timestamptz, '2026-01-02 06:53:30+00:00'::timestamptz, '2026-01-02 06:55:15+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[12], 'takeoff', '2026-01-03 06:21:00+00:00'::timestamptz, '2026-01-03 06:23:00+00:00'::timestamptz, '2026-01-03 06:24:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[12], 'landing', '2026-01-03 07:11:00+00:00'::timestamptz, '2026-01-03 07:14:30+00:00'::timestamptz, '2026-01-03 07:15:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[13], 'takeoff', '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:12:00+00:00'::timestamptz, '2026-01-04 06:14:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[13], 'landing', '2026-01-04 06:51:00+00:00'::timestamptz, '2026-01-04 06:54:30+00:00'::timestamptz, '2026-01-04 06:55:45+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[14], 'takeoff', '2026-01-05 06:10:00+00:00'::timestamptz, '2026-01-05 06:12:00+00:00'::timestamptz, '2026-01-05 06:15:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[14], 'landing', '2026-01-05 06:45:00+00:00'::timestamptz, '2026-01-05 06:48:30+00:00'::timestamptz, '2026-01-05 06:50:00+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[15], 'takeoff', '2026-01-06 06:15:00+00:00'::timestamptz, '2026-01-06 06:17:00+00:00'::timestamptz, '2026-01-06 06:18:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[15], 'landing', '2026-01-06 06:50:00+00:00'::timestamptz, '2026-01-06 06:53:30+00:00'::timestamptz, '2026-01-06 06:55:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[16], 'takeoff', '2026-01-07 06:06:00+00:00'::timestamptz, '2026-01-07 06:08:00+00:00'::timestamptz, '2026-01-07 06:10:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[16], 'landing', '2026-01-07 06:36:00+00:00'::timestamptz, '2026-01-07 06:39:30+00:00'::timestamptz, '2026-01-07 06:40:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[17], 'takeoff', '2026-01-08 06:18:00+00:00'::timestamptz, '2026-01-08 06:20:00+00:00'::timestamptz, '2026-01-08 06:23:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[17], 'landing', '2026-01-08 06:44:00+00:00'::timestamptz, '2026-01-08 06:47:30+00:00'::timestamptz, '2026-01-08 06:48:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[18], 'takeoff', '2026-01-12 11:47:00+00:00'::timestamptz, '2026-01-12 11:49:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[19], 'takeoff', '2026-01-01 06:23:00+00:00'::timestamptz, '2026-01-01 06:25:00+00:00'::timestamptz, '2026-01-01 06:27:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[19], 'landing', '2026-01-01 07:02:00+00:00'::timestamptz, '2026-01-01 07:05:30+00:00'::timestamptz, '2026-01-01 07:07:15+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[20], 'takeoff', '2026-01-02 06:29:00+00:00'::timestamptz, '2026-01-02 06:31:00+00:00'::timestamptz, '2026-01-02 06:34:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[20], 'landing', '2026-01-02 06:59:00+00:00'::timestamptz, '2026-01-02 07:02:30+00:00'::timestamptz, '2026-01-02 07:03:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[21], 'takeoff', '2026-01-03 06:14:00+00:00'::timestamptz, '2026-01-03 06:16:00+00:00'::timestamptz, '2026-01-03 06:17:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[21], 'landing', '2026-01-03 06:42:00+00:00'::timestamptz, '2026-01-03 06:45:30+00:00'::timestamptz, '2026-01-03 06:46:45+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[22], 'takeoff', '2026-01-04 06:28:00+00:00'::timestamptz, '2026-01-04 06:30:00+00:00'::timestamptz, '2026-01-04 06:32:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[22], 'landing', '2026-01-04 06:57:00+00:00'::timestamptz, '2026-01-04 07:00:30+00:00'::timestamptz, '2026-01-04 07:02:00+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[23], 'takeoff', '2026-01-05 06:27:00+00:00'::timestamptz, '2026-01-05 06:29:00+00:00'::timestamptz, '2026-01-05 06:32:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[23], 'landing', '2026-01-05 07:14:00+00:00'::timestamptz, '2026-01-05 07:17:30+00:00'::timestamptz, '2026-01-05 07:19:15+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[24], 'takeoff', '2026-01-06 06:32:00+00:00'::timestamptz, '2026-01-06 06:34:00+00:00'::timestamptz, '2026-01-06 06:35:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[24], 'landing', '2026-01-06 07:02:00+00:00'::timestamptz, '2026-01-06 07:05:30+00:00'::timestamptz, '2026-01-06 07:06:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[25], 'takeoff', '2026-01-07 06:31:00+00:00'::timestamptz, '2026-01-07 06:33:00+00:00'::timestamptz, '2026-01-07 06:35:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[25], 'landing', '2026-01-07 07:07:00+00:00'::timestamptz, '2026-01-07 07:10:30+00:00'::timestamptz, '2026-01-07 07:11:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[26], 'takeoff', '2026-01-08 06:28:00+00:00'::timestamptz, '2026-01-08 06:30:00+00:00'::timestamptz, '2026-01-08 06:33:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[26], 'landing', '2026-01-08 07:00:00+00:00'::timestamptz, '2026-01-08 07:03:30+00:00'::timestamptz, '2026-01-08 07:05:00+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[27], 'takeoff', '2026-01-12 11:32:00+00:00'::timestamptz, '2026-01-12 11:34:00+00:00'::timestamptz, '2026-01-12 11:35:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[28], 'takeoff', '2026-01-01 06:40:00+00:00'::timestamptz, '2026-01-01 06:42:00+00:00'::timestamptz, '2026-01-01 06:44:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[28], 'landing', '2026-01-01 07:24:00+00:00'::timestamptz, '2026-01-01 07:27:30+00:00'::timestamptz, '2026-01-01 07:28:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[29], 'takeoff', '2026-01-02 06:24:00+00:00'::timestamptz, '2026-01-02 06:26:00+00:00'::timestamptz, '2026-01-02 06:29:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[29], 'landing', '2026-01-02 07:16:00+00:00'::timestamptz, '2026-01-02 07:19:30+00:00'::timestamptz, '2026-01-02 07:20:45+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[30], 'takeoff', '2026-01-03 06:31:00+00:00'::timestamptz, '2026-01-03 06:33:00+00:00'::timestamptz, '2026-01-03 06:34:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[30], 'landing', '2026-01-03 07:01:00+00:00'::timestamptz, '2026-01-03 07:04:30+00:00'::timestamptz, '2026-01-03 07:06:00+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[31], 'takeoff', '2026-01-04 06:31:00+00:00'::timestamptz, '2026-01-04 06:33:00+00:00'::timestamptz, '2026-01-04 06:35:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[31], 'landing', '2026-01-04 07:10:00+00:00'::timestamptz, '2026-01-04 07:13:30+00:00'::timestamptz, '2026-01-04 07:15:15+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[32], 'takeoff', '2026-01-05 06:31:00+00:00'::timestamptz, '2026-01-05 06:33:00+00:00'::timestamptz, '2026-01-05 06:36:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[32], 'landing', '2026-01-05 07:13:00+00:00'::timestamptz, '2026-01-05 07:16:30+00:00'::timestamptz, '2026-01-05 07:17:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[33], 'takeoff', '2026-01-06 06:42:00+00:00'::timestamptz, '2026-01-06 06:44:00+00:00'::timestamptz, '2026-01-06 06:45:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[33], 'landing', '2026-01-06 07:31:00+00:00'::timestamptz, '2026-01-06 07:34:30+00:00'::timestamptz, '2026-01-06 07:35:45+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[34], 'takeoff', '2026-01-07 06:32:00+00:00'::timestamptz, '2026-01-07 06:34:00+00:00'::timestamptz, '2026-01-07 06:36:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[34], 'landing', '2026-01-07 07:16:00+00:00'::timestamptz, '2026-01-07 07:19:30+00:00'::timestamptz, '2026-01-07 07:21:00+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[35], 'takeoff', '2026-01-08 06:28:00+00:00'::timestamptz, '2026-01-08 06:30:00+00:00'::timestamptz, '2026-01-08 06:33:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[35], 'landing', '2026-01-08 07:23:00+00:00'::timestamptz, '2026-01-08 07:26:30+00:00'::timestamptz, '2026-01-08 07:28:15+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[36], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[31], flight_ids[37], 'takeoff', '2026-01-01 06:47:00+00:00'::timestamptz, '2026-01-01 06:49:00+00:00'::timestamptz, '2026-01-01 06:51:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[37], 'landing', '2026-01-01 07:22:00+00:00'::timestamptz, '2026-01-01 07:25:30+00:00'::timestamptz, '2026-01-01 07:26:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[38], 'takeoff', '2026-01-02 06:39:00+00:00'::timestamptz, '2026-01-02 06:41:00+00:00'::timestamptz, '2026-01-02 06:44:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[38], 'landing', '2026-01-02 07:17:00+00:00'::timestamptz, '2026-01-02 07:20:30+00:00'::timestamptz, '2026-01-02 07:22:00+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[39], 'takeoff', '2026-01-03 06:51:00+00:00'::timestamptz, '2026-01-03 06:53:00+00:00'::timestamptz, '2026-01-03 06:54:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[39], 'landing', '2026-01-03 07:16:00+00:00'::timestamptz, '2026-01-03 07:19:30+00:00'::timestamptz, '2026-01-03 07:21:15+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[40], 'takeoff', '2026-01-04 06:33:00+00:00'::timestamptz, '2026-01-04 06:35:00+00:00'::timestamptz, '2026-01-04 06:37:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[40], 'landing', '2026-01-04 07:13:00+00:00'::timestamptz, '2026-01-04 07:16:30+00:00'::timestamptz, '2026-01-04 07:17:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[41], 'takeoff', '2026-01-05 06:38:00+00:00'::timestamptz, '2026-01-05 06:40:00+00:00'::timestamptz, '2026-01-05 06:43:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[41], 'landing', '2026-01-05 07:15:00+00:00'::timestamptz, '2026-01-05 07:18:30+00:00'::timestamptz, '2026-01-05 07:19:45+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[42], 'takeoff', '2026-01-06 06:45:00+00:00'::timestamptz, '2026-01-06 06:47:00+00:00'::timestamptz, '2026-01-06 06:48:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[42], 'landing', '2026-01-06 07:12:00+00:00'::timestamptz, '2026-01-06 07:15:30+00:00'::timestamptz, '2026-01-06 07:17:00+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[43], 'takeoff', '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 06:53:00+00:00'::timestamptz, '2026-01-07 06:55:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[43], 'landing', '2026-01-07 07:25:00+00:00'::timestamptz, '2026-01-07 07:28:30+00:00'::timestamptz, '2026-01-07 07:30:15+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[44], 'takeoff', '2026-01-08 06:33:00+00:00'::timestamptz, '2026-01-08 06:35:00+00:00'::timestamptz, '2026-01-08 06:38:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[44], 'landing', '2026-01-08 07:23:00+00:00'::timestamptz, '2026-01-08 07:26:30+00:00'::timestamptz, '2026-01-08 07:27:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[45], 'takeoff', '2026-01-12 09:57:00+00:00'::timestamptz, '2026-01-12 09:59:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[45], 'landing', '2026-01-12 10:43:00+00:00'::timestamptz, '2026-01-12 10:46:30+00:00'::timestamptz, '2026-01-12 10:47:45+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[46], 'takeoff', '2026-01-01 06:56:00+00:00'::timestamptz, '2026-01-01 06:58:00+00:00'::timestamptz, '2026-01-01 07:00:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[46], 'landing', '2026-01-01 07:47:00+00:00'::timestamptz, '2026-01-01 07:50:30+00:00'::timestamptz, '2026-01-01 07:52:00+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[47], 'takeoff', '2026-01-02 06:42:00+00:00'::timestamptz, '2026-01-02 06:44:00+00:00'::timestamptz, '2026-01-02 06:47:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[47], 'landing', '2026-01-02 07:26:00+00:00'::timestamptz, '2026-01-02 07:29:30+00:00'::timestamptz, '2026-01-02 07:31:15+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[48], 'takeoff', '2026-01-03 06:56:00+00:00'::timestamptz, '2026-01-03 06:58:00+00:00'::timestamptz, '2026-01-03 06:59:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[48], 'landing', '2026-01-03 07:23:00+00:00'::timestamptz, '2026-01-03 07:26:30+00:00'::timestamptz, '2026-01-03 07:27:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[49], 'takeoff', '2026-01-04 06:51:00+00:00'::timestamptz, '2026-01-04 06:53:00+00:00'::timestamptz, '2026-01-04 06:55:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[49], 'landing', '2026-01-04 07:35:00+00:00'::timestamptz, '2026-01-04 07:38:30+00:00'::timestamptz, '2026-01-04 07:39:45+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[50], 'takeoff', '2026-01-05 06:59:00+00:00'::timestamptz, '2026-01-05 07:01:00+00:00'::timestamptz, '2026-01-05 07:04:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[50], 'landing', '2026-01-05 07:45:00+00:00'::timestamptz, '2026-01-05 07:48:30+00:00'::timestamptz, '2026-01-05 07:50:00+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[51], 'takeoff', '2026-01-06 06:55:00+00:00'::timestamptz, '2026-01-06 06:57:00+00:00'::timestamptz, '2026-01-06 06:58:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[51], 'landing', '2026-01-06 07:20:00+00:00'::timestamptz, '2026-01-06 07:23:30+00:00'::timestamptz, '2026-01-06 07:25:15+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[52], 'takeoff', '2026-01-07 06:53:00+00:00'::timestamptz, '2026-01-07 06:55:00+00:00'::timestamptz, '2026-01-07 06:57:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[52], 'landing', '2026-01-07 07:39:00+00:00'::timestamptz, '2026-01-07 07:42:30+00:00'::timestamptz, '2026-01-07 07:43:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[53], 'takeoff', '2026-01-08 06:46:00+00:00'::timestamptz, '2026-01-08 06:48:00+00:00'::timestamptz, '2026-01-08 06:51:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[53], 'landing', '2026-01-08 07:34:00+00:00'::timestamptz, '2026-01-08 07:37:30+00:00'::timestamptz, '2026-01-08 07:38:45+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[54], 'takeoff', '2026-01-12 11:47:00+00:00'::timestamptz, '2026-01-12 11:49:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[55], 'takeoff', '2026-01-01 06:53:00+00:00'::timestamptz, '2026-01-01 06:55:00+00:00'::timestamptz, '2026-01-01 06:57:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[55], 'landing', '2026-01-01 07:46:00+00:00'::timestamptz, '2026-01-01 07:49:30+00:00'::timestamptz, '2026-01-01 07:51:15+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[56], 'takeoff', '2026-01-02 07:01:00+00:00'::timestamptz, '2026-01-02 07:03:00+00:00'::timestamptz, '2026-01-02 07:06:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[56], 'landing', '2026-01-02 07:41:00+00:00'::timestamptz, '2026-01-02 07:44:30+00:00'::timestamptz, '2026-01-02 07:45:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[57], 'takeoff', '2026-01-03 06:54:00+00:00'::timestamptz, '2026-01-03 06:56:00+00:00'::timestamptz, '2026-01-03 06:57:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[57], 'landing', '2026-01-03 07:32:00+00:00'::timestamptz, '2026-01-03 07:35:30+00:00'::timestamptz, '2026-01-03 07:36:45+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[58], 'takeoff', '2026-01-04 07:11:00+00:00'::timestamptz, '2026-01-04 07:13:00+00:00'::timestamptz, '2026-01-04 07:15:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[58], 'landing', '2026-01-04 07:52:00+00:00'::timestamptz, '2026-01-04 07:55:30+00:00'::timestamptz, '2026-01-04 07:57:00+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[59], 'takeoff', '2026-01-05 07:10:00+00:00'::timestamptz, '2026-01-05 07:12:00+00:00'::timestamptz, '2026-01-05 07:15:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[59], 'landing', '2026-01-05 07:46:00+00:00'::timestamptz, '2026-01-05 07:49:30+00:00'::timestamptz, '2026-01-05 07:51:15+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[60], 'takeoff', '2026-01-06 07:12:00+00:00'::timestamptz, '2026-01-06 07:14:00+00:00'::timestamptz, '2026-01-06 07:15:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[60], 'landing', '2026-01-06 07:43:00+00:00'::timestamptz, '2026-01-06 07:46:30+00:00'::timestamptz, '2026-01-06 07:47:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[61], 'takeoff', '2026-01-07 07:01:00+00:00'::timestamptz, '2026-01-07 07:03:00+00:00'::timestamptz, '2026-01-07 07:05:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[61], 'landing', '2026-01-07 07:43:00+00:00'::timestamptz, '2026-01-07 07:46:30+00:00'::timestamptz, '2026-01-07 07:47:45+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[62], 'takeoff', '2026-01-08 07:10:00+00:00'::timestamptz, '2026-01-08 07:12:00+00:00'::timestamptz, '2026-01-08 07:15:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[62], 'landing', '2026-01-08 07:39:00+00:00'::timestamptz, '2026-01-08 07:42:30+00:00'::timestamptz, '2026-01-08 07:44:00+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[63], 'takeoff', '2026-01-12 11:19:00+00:00'::timestamptz, '2026-01-12 11:21:00+00:00'::timestamptz, '2026-01-12 11:22:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[64], 'takeoff', '2026-01-01 07:17:00+00:00'::timestamptz, '2026-01-01 07:19:00+00:00'::timestamptz, '2026-01-01 07:21:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[64], 'landing', '2026-01-01 07:49:00+00:00'::timestamptz, '2026-01-01 07:52:30+00:00'::timestamptz, '2026-01-01 07:53:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[65], 'takeoff', '2026-01-02 07:14:00+00:00'::timestamptz, '2026-01-02 07:16:00+00:00'::timestamptz, '2026-01-02 07:19:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[65], 'landing', '2026-01-02 07:42:00+00:00'::timestamptz, '2026-01-02 07:45:30+00:00'::timestamptz, '2026-01-02 07:46:45+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[66], 'takeoff', '2026-01-03 07:05:00+00:00'::timestamptz, '2026-01-03 07:07:00+00:00'::timestamptz, '2026-01-03 07:08:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[66], 'landing', '2026-01-03 07:45:00+00:00'::timestamptz, '2026-01-03 07:48:30+00:00'::timestamptz, '2026-01-03 07:50:00+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[67], 'takeoff', '2026-01-04 07:16:00+00:00'::timestamptz, '2026-01-04 07:18:00+00:00'::timestamptz, '2026-01-04 07:20:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[67], 'landing', '2026-01-04 07:56:00+00:00'::timestamptz, '2026-01-04 07:59:30+00:00'::timestamptz, '2026-01-04 08:01:15+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[68], 'takeoff', '2026-01-05 07:16:00+00:00'::timestamptz, '2026-01-05 07:18:00+00:00'::timestamptz, '2026-01-05 07:21:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[68], 'landing', '2026-01-05 07:57:00+00:00'::timestamptz, '2026-01-05 08:00:30+00:00'::timestamptz, '2026-01-05 08:01:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[69], 'takeoff', '2026-01-06 07:22:00+00:00'::timestamptz, '2026-01-06 07:24:00+00:00'::timestamptz, '2026-01-06 07:25:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[69], 'landing', '2026-01-06 08:02:00+00:00'::timestamptz, '2026-01-06 08:05:30+00:00'::timestamptz, '2026-01-06 08:06:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[70], 'takeoff', '2026-01-07 07:16:00+00:00'::timestamptz, '2026-01-07 07:18:00+00:00'::timestamptz, '2026-01-07 07:20:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[70], 'landing', '2026-01-07 08:00:00+00:00'::timestamptz, '2026-01-07 08:03:30+00:00'::timestamptz, '2026-01-07 08:05:00+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[71], 'takeoff', '2026-01-08 07:12:00+00:00'::timestamptz, '2026-01-08 07:14:00+00:00'::timestamptz, '2026-01-08 07:17:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[71], 'landing', '2026-01-08 07:43:00+00:00'::timestamptz, '2026-01-08 07:46:30+00:00'::timestamptz, '2026-01-08 07:48:15+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[72], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[50], flight_ids[73], 'takeoff', '2026-01-01 07:21:00+00:00'::timestamptz, '2026-01-01 07:23:00+00:00'::timestamptz, '2026-01-01 07:25:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[73], 'landing', '2026-01-01 08:00:00+00:00'::timestamptz, '2026-01-01 08:03:30+00:00'::timestamptz, '2026-01-01 08:04:45+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[74], 'takeoff', '2026-01-02 07:17:00+00:00'::timestamptz, '2026-01-02 07:19:00+00:00'::timestamptz, '2026-01-02 07:22:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[74], 'landing', '2026-01-02 07:46:00+00:00'::timestamptz, '2026-01-02 07:49:30+00:00'::timestamptz, '2026-01-02 07:51:00+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[75], 'takeoff', '2026-01-03 07:21:00+00:00'::timestamptz, '2026-01-03 07:23:00+00:00'::timestamptz, '2026-01-03 07:24:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[75], 'landing', '2026-01-03 07:50:00+00:00'::timestamptz, '2026-01-03 07:53:30+00:00'::timestamptz, '2026-01-03 07:55:15+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[76], 'takeoff', '2026-01-04 07:17:00+00:00'::timestamptz, '2026-01-04 07:19:00+00:00'::timestamptz, '2026-01-04 07:21:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[76], 'landing', '2026-01-04 07:56:00+00:00'::timestamptz, '2026-01-04 07:59:30+00:00'::timestamptz, '2026-01-04 08:00:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[77], 'takeoff', '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:32:00+00:00'::timestamptz, '2026-01-05 07:35:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[77], 'landing', '2026-01-05 08:17:00+00:00'::timestamptz, '2026-01-05 08:20:30+00:00'::timestamptz, '2026-01-05 08:21:45+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[78], 'takeoff', '2026-01-06 07:17:00+00:00'::timestamptz, '2026-01-06 07:19:00+00:00'::timestamptz, '2026-01-06 07:20:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[78], 'landing', '2026-01-06 07:55:00+00:00'::timestamptz, '2026-01-06 07:58:30+00:00'::timestamptz, '2026-01-06 08:00:00+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[79], 'takeoff', '2026-01-07 07:28:00+00:00'::timestamptz, '2026-01-07 07:30:00+00:00'::timestamptz, '2026-01-07 07:32:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[79], 'landing', '2026-01-07 08:21:00+00:00'::timestamptz, '2026-01-07 08:24:30+00:00'::timestamptz, '2026-01-07 08:26:15+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[80], 'takeoff', '2026-01-08 07:28:00+00:00'::timestamptz, '2026-01-08 07:30:00+00:00'::timestamptz, '2026-01-08 07:33:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[80], 'landing', '2026-01-08 08:16:00+00:00'::timestamptz, '2026-01-08 08:19:30+00:00'::timestamptz, '2026-01-08 08:20:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[81], 'takeoff', '2026-01-12 09:57:00+00:00'::timestamptz, '2026-01-12 09:59:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[81], 'landing', '2026-01-12 10:42:00+00:00'::timestamptz, '2026-01-12 10:45:30+00:00'::timestamptz, '2026-01-12 10:46:45+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[82], 'takeoff', '2026-01-01 07:25:00+00:00'::timestamptz, '2026-01-01 07:27:00+00:00'::timestamptz, '2026-01-01 07:29:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[82], 'landing', '2026-01-01 08:20:00+00:00'::timestamptz, '2026-01-01 08:23:30+00:00'::timestamptz, '2026-01-01 08:25:00+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[83], 'takeoff', '2026-01-02 07:33:00+00:00'::timestamptz, '2026-01-02 07:35:00+00:00'::timestamptz, '2026-01-02 07:38:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[83], 'landing', '2026-01-02 08:25:00+00:00'::timestamptz, '2026-01-02 08:28:30+00:00'::timestamptz, '2026-01-02 08:30:15+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[84], 'takeoff', '2026-01-03 07:24:00+00:00'::timestamptz, '2026-01-03 07:26:00+00:00'::timestamptz, '2026-01-03 07:27:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[84], 'landing', '2026-01-03 08:06:00+00:00'::timestamptz, '2026-01-03 08:09:30+00:00'::timestamptz, '2026-01-03 08:10:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[85], 'takeoff', '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz, '2026-01-04 07:44:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[85], 'landing', '2026-01-04 08:22:00+00:00'::timestamptz, '2026-01-04 08:25:30+00:00'::timestamptz, '2026-01-04 08:26:45+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[86], 'takeoff', '2026-01-05 07:32:00+00:00'::timestamptz, '2026-01-05 07:34:00+00:00'::timestamptz, '2026-01-05 07:37:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[86], 'landing', '2026-01-05 08:10:00+00:00'::timestamptz, '2026-01-05 08:13:30+00:00'::timestamptz, '2026-01-05 08:15:00+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[87], 'takeoff', '2026-01-06 07:28:00+00:00'::timestamptz, '2026-01-06 07:30:00+00:00'::timestamptz, '2026-01-06 07:31:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[87], 'landing', '2026-01-06 08:05:00+00:00'::timestamptz, '2026-01-06 08:08:30+00:00'::timestamptz, '2026-01-06 08:10:15+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[88], 'takeoff', '2026-01-07 07:24:00+00:00'::timestamptz, '2026-01-07 07:26:00+00:00'::timestamptz, '2026-01-07 07:28:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[88], 'landing', '2026-01-07 07:58:00+00:00'::timestamptz, '2026-01-07 08:01:30+00:00'::timestamptz, '2026-01-07 08:02:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[89], 'takeoff', '2026-01-08 07:27:00+00:00'::timestamptz, '2026-01-08 07:29:00+00:00'::timestamptz, '2026-01-08 07:32:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[89], 'landing', '2026-01-08 08:15:00+00:00'::timestamptz, '2026-01-08 08:18:30+00:00'::timestamptz, '2026-01-08 08:19:45+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[90], 'takeoff', '2026-01-12 11:47:00+00:00'::timestamptz, '2026-01-12 11:49:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[91], 'takeoff', '2026-01-01 07:35:00+00:00'::timestamptz, '2026-01-01 07:37:00+00:00'::timestamptz, '2026-01-01 07:39:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[91], 'landing', '2026-01-01 08:04:00+00:00'::timestamptz, '2026-01-01 08:07:30+00:00'::timestamptz, '2026-01-01 08:09:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[92], 'takeoff', '2026-01-02 07:32:00+00:00'::timestamptz, '2026-01-02 07:34:00+00:00'::timestamptz, '2026-01-02 07:37:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[92], 'landing', '2026-01-02 08:11:00+00:00'::timestamptz, '2026-01-02 08:14:30+00:00'::timestamptz, '2026-01-02 08:15:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[93], 'takeoff', '2026-01-03 07:51:00+00:00'::timestamptz, '2026-01-03 07:53:00+00:00'::timestamptz, '2026-01-03 07:54:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[93], 'landing', '2026-01-03 08:36:00+00:00'::timestamptz, '2026-01-03 08:39:30+00:00'::timestamptz, '2026-01-03 08:40:45+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[94], 'takeoff', '2026-01-04 07:38:00+00:00'::timestamptz, '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:42:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[94], 'landing', '2026-01-04 08:05:00+00:00'::timestamptz, '2026-01-04 08:08:30+00:00'::timestamptz, '2026-01-04 08:10:00+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[95], 'takeoff', '2026-01-05 07:46:00+00:00'::timestamptz, '2026-01-05 07:48:00+00:00'::timestamptz, '2026-01-05 07:51:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[95], 'landing', '2026-01-05 08:24:00+00:00'::timestamptz, '2026-01-05 08:27:30+00:00'::timestamptz, '2026-01-05 08:29:15+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[96], 'takeoff', '2026-01-06 07:34:00+00:00'::timestamptz, '2026-01-06 07:36:00+00:00'::timestamptz, '2026-01-06 07:37:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[96], 'landing', '2026-01-06 08:26:00+00:00'::timestamptz, '2026-01-06 08:29:30+00:00'::timestamptz, '2026-01-06 08:30:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[97], 'takeoff', '2026-01-07 07:48:00+00:00'::timestamptz, '2026-01-07 07:50:00+00:00'::timestamptz, '2026-01-07 07:52:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[97], 'landing', '2026-01-07 08:16:00+00:00'::timestamptz, '2026-01-07 08:19:30+00:00'::timestamptz, '2026-01-07 08:20:45+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[98], 'takeoff', '2026-01-08 07:40:00+00:00'::timestamptz, '2026-01-08 07:42:00+00:00'::timestamptz, '2026-01-08 07:45:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[98], 'landing', '2026-01-08 08:22:00+00:00'::timestamptz, '2026-01-08 08:25:30+00:00'::timestamptz, '2026-01-08 08:27:00+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[99], 'takeoff', '2026-01-12 11:13:00+00:00'::timestamptz, '2026-01-12 11:15:00+00:00'::timestamptz, '2026-01-12 11:16:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[100], 'takeoff', '2026-01-01 07:47:00+00:00'::timestamptz, '2026-01-01 07:49:00+00:00'::timestamptz, '2026-01-01 07:51:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[100], 'landing', '2026-01-01 08:38:00+00:00'::timestamptz, '2026-01-01 08:41:30+00:00'::timestamptz, '2026-01-01 08:42:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[101], 'takeoff', '2026-01-02 07:43:00+00:00'::timestamptz, '2026-01-02 07:45:00+00:00'::timestamptz, '2026-01-02 07:48:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[101], 'landing', '2026-01-02 08:22:00+00:00'::timestamptz, '2026-01-02 08:25:30+00:00'::timestamptz, '2026-01-02 08:26:45+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[102], 'takeoff', '2026-01-03 08:02:00+00:00'::timestamptz, '2026-01-03 08:04:00+00:00'::timestamptz, '2026-01-03 08:05:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[102], 'landing', '2026-01-03 08:40:00+00:00'::timestamptz, '2026-01-03 08:43:30+00:00'::timestamptz, '2026-01-03 08:45:00+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[103], 'takeoff', '2026-01-04 07:51:00+00:00'::timestamptz, '2026-01-04 07:53:00+00:00'::timestamptz, '2026-01-04 07:55:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[103], 'landing', '2026-01-04 08:37:00+00:00'::timestamptz, '2026-01-04 08:40:30+00:00'::timestamptz, '2026-01-04 08:42:15+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[104], 'takeoff', '2026-01-05 07:50:00+00:00'::timestamptz, '2026-01-05 07:52:00+00:00'::timestamptz, '2026-01-05 07:55:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[104], 'landing', '2026-01-05 08:27:00+00:00'::timestamptz, '2026-01-05 08:30:30+00:00'::timestamptz, '2026-01-05 08:31:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[105], 'takeoff', '2026-01-06 07:49:00+00:00'::timestamptz, '2026-01-06 07:51:00+00:00'::timestamptz, '2026-01-06 07:52:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[105], 'landing', '2026-01-06 08:41:00+00:00'::timestamptz, '2026-01-06 08:44:30+00:00'::timestamptz, '2026-01-06 08:45:45+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[106], 'takeoff', '2026-01-07 07:47:00+00:00'::timestamptz, '2026-01-07 07:49:00+00:00'::timestamptz, '2026-01-07 07:51:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[106], 'landing', '2026-01-07 08:34:00+00:00'::timestamptz, '2026-01-07 08:37:30+00:00'::timestamptz, '2026-01-07 08:39:00+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[107], 'takeoff', '2026-01-08 07:48:00+00:00'::timestamptz, '2026-01-08 07:50:00+00:00'::timestamptz, '2026-01-08 07:53:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[107], 'landing', '2026-01-08 08:36:00+00:00'::timestamptz, '2026-01-08 08:39:30+00:00'::timestamptz, '2026-01-08 08:41:15+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[108], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[26], flight_ids[109], 'takeoff', '2026-01-01 08:02:00+00:00'::timestamptz, '2026-01-01 08:04:00+00:00'::timestamptz, '2026-01-01 08:06:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[109], 'landing', '2026-01-01 08:28:00+00:00'::timestamptz, '2026-01-01 08:31:30+00:00'::timestamptz, '2026-01-01 08:32:45+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[110], 'takeoff', '2026-01-02 08:03:00+00:00'::timestamptz, '2026-01-02 08:05:00+00:00'::timestamptz, '2026-01-02 08:08:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[110], 'landing', '2026-01-02 08:32:00+00:00'::timestamptz, '2026-01-02 08:35:30+00:00'::timestamptz, '2026-01-02 08:37:00+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[111], 'takeoff', '2026-01-03 08:10:00+00:00'::timestamptz, '2026-01-03 08:12:00+00:00'::timestamptz, '2026-01-03 08:13:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[111], 'landing', '2026-01-03 08:45:00+00:00'::timestamptz, '2026-01-03 08:48:30+00:00'::timestamptz, '2026-01-03 08:50:15+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[112], 'takeoff', '2026-01-04 07:54:00+00:00'::timestamptz, '2026-01-04 07:56:00+00:00'::timestamptz, '2026-01-04 07:58:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[112], 'landing', '2026-01-04 08:40:00+00:00'::timestamptz, '2026-01-04 08:43:30+00:00'::timestamptz, '2026-01-04 08:44:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[113], 'takeoff', '2026-01-05 07:59:00+00:00'::timestamptz, '2026-01-05 08:01:00+00:00'::timestamptz, '2026-01-05 08:04:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[113], 'landing', '2026-01-05 08:45:00+00:00'::timestamptz, '2026-01-05 08:48:30+00:00'::timestamptz, '2026-01-05 08:49:45+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[114], 'takeoff', '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 08:02:00+00:00'::timestamptz, '2026-01-06 08:03:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[114], 'landing', '2026-01-06 08:43:00+00:00'::timestamptz, '2026-01-06 08:46:30+00:00'::timestamptz, '2026-01-06 08:48:00+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[115], 'takeoff', '2026-01-07 08:01:00+00:00'::timestamptz, '2026-01-07 08:03:00+00:00'::timestamptz, '2026-01-07 08:05:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[115], 'landing', '2026-01-07 08:35:00+00:00'::timestamptz, '2026-01-07 08:38:30+00:00'::timestamptz, '2026-01-07 08:40:15+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[116], 'takeoff', '2026-01-12 09:55:00+00:00'::timestamptz, '2026-01-12 09:57:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[116], 'landing', '2026-01-12 10:38:00+00:00'::timestamptz, '2026-01-12 10:41:30+00:00'::timestamptz, '2026-01-12 10:42:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[117], 'takeoff', '2026-01-01 08:11:00+00:00'::timestamptz, '2026-01-01 08:13:00+00:00'::timestamptz, '2026-01-01 08:14:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[117], 'landing', '2026-01-01 09:03:00+00:00'::timestamptz, '2026-01-01 09:06:30+00:00'::timestamptz, '2026-01-01 09:07:45+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[118], 'takeoff', '2026-01-02 08:12:00+00:00'::timestamptz, '2026-01-02 08:14:00+00:00'::timestamptz, '2026-01-02 08:16:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[118], 'landing', '2026-01-02 09:00:00+00:00'::timestamptz, '2026-01-02 09:03:30+00:00'::timestamptz, '2026-01-02 09:05:00+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[119], 'takeoff', '2026-01-03 08:05:00+00:00'::timestamptz, '2026-01-03 08:07:00+00:00'::timestamptz, '2026-01-03 08:10:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[119], 'landing', '2026-01-03 08:50:00+00:00'::timestamptz, '2026-01-03 08:53:30+00:00'::timestamptz, '2026-01-03 08:55:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[120], 'takeoff', '2026-01-04 08:17:00+00:00'::timestamptz, '2026-01-04 08:19:00+00:00'::timestamptz, '2026-01-04 08:20:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[120], 'landing', '2026-01-04 09:07:00+00:00'::timestamptz, '2026-01-04 09:10:30+00:00'::timestamptz, '2026-01-04 09:11:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[121], 'takeoff', '2026-01-05 08:03:00+00:00'::timestamptz, '2026-01-05 08:05:00+00:00'::timestamptz, '2026-01-05 08:07:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[121], 'landing', '2026-01-05 08:50:00+00:00'::timestamptz, '2026-01-05 08:53:30+00:00'::timestamptz, '2026-01-05 08:54:45+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[122], 'takeoff', '2026-01-06 08:16:00+00:00'::timestamptz, '2026-01-06 08:18:00+00:00'::timestamptz, '2026-01-06 08:21:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[122], 'landing', '2026-01-06 09:02:00+00:00'::timestamptz, '2026-01-06 09:05:30+00:00'::timestamptz, '2026-01-06 09:07:00+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[123], 'takeoff', '2026-01-07 08:16:00+00:00'::timestamptz, '2026-01-07 08:18:00+00:00'::timestamptz, '2026-01-07 08:19:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[123], 'landing', '2026-01-07 08:54:00+00:00'::timestamptz, '2026-01-07 08:57:30+00:00'::timestamptz, '2026-01-07 08:59:15+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[124], 'takeoff', '2026-01-12 11:46:00+00:00'::timestamptz, '2026-01-12 11:48:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[125], 'takeoff', '2026-01-01 08:21:00+00:00'::timestamptz, '2026-01-01 08:23:00+00:00'::timestamptz, '2026-01-01 08:26:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[125], 'landing', '2026-01-01 09:08:00+00:00'::timestamptz, '2026-01-01 09:11:30+00:00'::timestamptz, '2026-01-01 09:12:45+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[126], 'takeoff', '2026-01-02 08:24:00+00:00'::timestamptz, '2026-01-02 08:26:00+00:00'::timestamptz, '2026-01-02 08:27:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[126], 'landing', '2026-01-02 09:03:00+00:00'::timestamptz, '2026-01-02 09:06:30+00:00'::timestamptz, '2026-01-02 09:08:00+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[127], 'takeoff', '2026-01-03 08:14:00+00:00'::timestamptz, '2026-01-03 08:16:00+00:00'::timestamptz, '2026-01-03 08:18:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[127], 'landing', '2026-01-03 08:48:00+00:00'::timestamptz, '2026-01-03 08:51:30+00:00'::timestamptz, '2026-01-03 08:53:15+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[128], 'takeoff', '2026-01-04 08:30:00+00:00'::timestamptz, '2026-01-04 08:32:00+00:00'::timestamptz, '2026-01-04 08:35:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[128], 'landing', '2026-01-04 09:24:00+00:00'::timestamptz, '2026-01-04 09:27:30+00:00'::timestamptz, '2026-01-04 09:28:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[129], 'takeoff', '2026-01-05 08:16:00+00:00'::timestamptz, '2026-01-05 08:18:00+00:00'::timestamptz, '2026-01-05 08:19:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[129], 'landing', '2026-01-05 09:06:00+00:00'::timestamptz, '2026-01-05 09:09:30+00:00'::timestamptz, '2026-01-05 09:10:45+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[130], 'takeoff', '2026-01-06 08:28:00+00:00'::timestamptz, '2026-01-06 08:30:00+00:00'::timestamptz, '2026-01-06 08:32:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[130], 'landing', '2026-01-06 09:06:00+00:00'::timestamptz, '2026-01-06 09:09:30+00:00'::timestamptz, '2026-01-06 09:11:00+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[131], 'takeoff', '2026-01-07 08:23:00+00:00'::timestamptz, '2026-01-07 08:25:00+00:00'::timestamptz, '2026-01-07 08:28:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[131], 'landing', '2026-01-07 09:08:00+00:00'::timestamptz, '2026-01-07 09:11:30+00:00'::timestamptz, '2026-01-07 09:13:15+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[132], 'takeoff', '2026-01-12 11:28:00+00:00'::timestamptz, '2026-01-12 11:30:00+00:00'::timestamptz, '2026-01-12 11:31:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[133], 'takeoff', '2026-01-01 08:38:00+00:00'::timestamptz, '2026-01-01 08:40:00+00:00'::timestamptz, '2026-01-01 08:42:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[133], 'landing', '2026-01-01 09:23:00+00:00'::timestamptz, '2026-01-01 09:26:30+00:00'::timestamptz, '2026-01-01 09:27:45+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[134], 'takeoff', '2026-01-02 08:30:00+00:00'::timestamptz, '2026-01-02 08:32:00+00:00'::timestamptz, '2026-01-02 08:35:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[134], 'landing', '2026-01-02 08:59:00+00:00'::timestamptz, '2026-01-02 09:02:30+00:00'::timestamptz, '2026-01-02 09:04:00+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[135], 'takeoff', '2026-01-03 08:37:00+00:00'::timestamptz, '2026-01-03 08:39:00+00:00'::timestamptz, '2026-01-03 08:40:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[135], 'landing', '2026-01-03 09:21:00+00:00'::timestamptz, '2026-01-03 09:24:30+00:00'::timestamptz, '2026-01-03 09:26:15+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[136], 'takeoff', '2026-01-04 08:29:00+00:00'::timestamptz, '2026-01-04 08:31:00+00:00'::timestamptz, '2026-01-04 08:33:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[136], 'landing', '2026-01-04 08:58:00+00:00'::timestamptz, '2026-01-04 09:01:30+00:00'::timestamptz, '2026-01-04 09:02:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[137], 'takeoff', '2026-01-05 08:23:00+00:00'::timestamptz, '2026-01-05 08:25:00+00:00'::timestamptz, '2026-01-05 08:28:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[137], 'landing', '2026-01-05 09:08:00+00:00'::timestamptz, '2026-01-05 09:11:30+00:00'::timestamptz, '2026-01-05 09:12:45+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[138], 'takeoff', '2026-01-06 08:30:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, '2026-01-06 08:33:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[138], 'landing', '2026-01-06 09:16:00+00:00'::timestamptz, '2026-01-06 09:19:30+00:00'::timestamptz, '2026-01-06 09:21:00+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[139], 'takeoff', '2026-01-07 08:27:00+00:00'::timestamptz, '2026-01-07 08:29:00+00:00'::timestamptz, '2026-01-07 08:31:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[139], 'landing', '2026-01-07 09:03:00+00:00'::timestamptz, '2026-01-07 09:06:30+00:00'::timestamptz, '2026-01-07 09:08:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[140], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[45], flight_ids[141], 'takeoff', '2026-01-01 08:51:00+00:00'::timestamptz, '2026-01-01 08:53:00+00:00'::timestamptz, '2026-01-01 08:54:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[141], 'landing', '2026-01-01 09:30:00+00:00'::timestamptz, '2026-01-01 09:33:30+00:00'::timestamptz, '2026-01-01 09:34:45+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[142], 'takeoff', '2026-01-02 08:49:00+00:00'::timestamptz, '2026-01-02 08:51:00+00:00'::timestamptz, '2026-01-02 08:53:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[142], 'landing', '2026-01-02 09:26:00+00:00'::timestamptz, '2026-01-02 09:29:30+00:00'::timestamptz, '2026-01-02 09:31:00+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[143], 'takeoff', '2026-01-03 08:35:00+00:00'::timestamptz, '2026-01-03 08:37:00+00:00'::timestamptz, '2026-01-03 08:40:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[143], 'landing', '2026-01-03 09:03:00+00:00'::timestamptz, '2026-01-03 09:06:30+00:00'::timestamptz, '2026-01-03 09:08:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[144], 'takeoff', '2026-01-04 08:43:00+00:00'::timestamptz, '2026-01-04 08:45:00+00:00'::timestamptz, '2026-01-04 08:46:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[144], 'landing', '2026-01-04 09:08:00+00:00'::timestamptz, '2026-01-04 09:11:30+00:00'::timestamptz, '2026-01-04 09:12:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[145], 'takeoff', '2026-01-05 08:44:00+00:00'::timestamptz, '2026-01-05 08:46:00+00:00'::timestamptz, '2026-01-05 08:48:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[145], 'landing', '2026-01-05 09:39:00+00:00'::timestamptz, '2026-01-05 09:42:30+00:00'::timestamptz, '2026-01-05 09:43:45+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[146], 'takeoff', '2026-01-06 08:37:00+00:00'::timestamptz, '2026-01-06 08:39:00+00:00'::timestamptz, '2026-01-06 08:42:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[146], 'landing', '2026-01-06 09:03:00+00:00'::timestamptz, '2026-01-06 09:06:30+00:00'::timestamptz, '2026-01-06 09:08:00+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[147], 'takeoff', '2026-01-07 08:45:00+00:00'::timestamptz, '2026-01-07 08:47:00+00:00'::timestamptz, '2026-01-07 08:48:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[147], 'landing', '2026-01-07 09:09:00+00:00'::timestamptz, '2026-01-07 09:12:30+00:00'::timestamptz, '2026-01-07 09:14:15+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[148], 'takeoff', '2026-01-12 09:56:00+00:00'::timestamptz, '2026-01-12 09:58:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[148], 'landing', '2026-01-12 10:22:00+00:00'::timestamptz, '2026-01-12 10:25:30+00:00'::timestamptz, '2026-01-12 10:26:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[149], 'takeoff', '2026-01-01 08:46:00+00:00'::timestamptz, '2026-01-01 08:48:00+00:00'::timestamptz, '2026-01-01 08:51:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[149], 'landing', '2026-01-01 09:29:00+00:00'::timestamptz, '2026-01-01 09:32:30+00:00'::timestamptz, '2026-01-01 09:33:45+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[150], 'takeoff', '2026-01-02 09:02:00+00:00'::timestamptz, '2026-01-02 09:04:00+00:00'::timestamptz, '2026-01-02 09:05:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[150], 'landing', '2026-01-02 09:28:00+00:00'::timestamptz, '2026-01-02 09:31:30+00:00'::timestamptz, '2026-01-02 09:33:00+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[151], 'takeoff', '2026-01-03 08:46:00+00:00'::timestamptz, '2026-01-03 08:48:00+00:00'::timestamptz, '2026-01-03 08:50:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[151], 'landing', '2026-01-03 09:33:00+00:00'::timestamptz, '2026-01-03 09:36:30+00:00'::timestamptz, '2026-01-03 09:38:15+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[152], 'takeoff', '2026-01-04 08:59:00+00:00'::timestamptz, '2026-01-04 09:01:00+00:00'::timestamptz, '2026-01-04 09:04:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[152], 'landing', '2026-01-04 09:30:00+00:00'::timestamptz, '2026-01-04 09:33:30+00:00'::timestamptz, '2026-01-04 09:34:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[153], 'takeoff', '2026-01-05 08:45:00+00:00'::timestamptz, '2026-01-05 08:47:00+00:00'::timestamptz, '2026-01-05 08:48:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[153], 'landing', '2026-01-05 09:18:00+00:00'::timestamptz, '2026-01-05 09:21:30+00:00'::timestamptz, '2026-01-05 09:22:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[154], 'takeoff', '2026-01-06 08:57:00+00:00'::timestamptz, '2026-01-06 08:59:00+00:00'::timestamptz, '2026-01-06 09:01:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[154], 'landing', '2026-01-06 09:51:00+00:00'::timestamptz, '2026-01-06 09:54:30+00:00'::timestamptz, '2026-01-06 09:56:00+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[155], 'takeoff', '2026-01-07 08:53:00+00:00'::timestamptz, '2026-01-07 08:55:00+00:00'::timestamptz, '2026-01-07 08:58:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[155], 'landing', '2026-01-07 09:30:00+00:00'::timestamptz, '2026-01-07 09:33:30+00:00'::timestamptz, '2026-01-07 09:35:15+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[156], 'takeoff', '2026-01-12 11:47:00+00:00'::timestamptz, '2026-01-12 11:49:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[157], 'takeoff', '2026-01-01 08:54:00+00:00'::timestamptz, '2026-01-01 08:56:00+00:00'::timestamptz, '2026-01-01 08:58:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[157], 'landing', '2026-01-01 09:26:00+00:00'::timestamptz, '2026-01-01 09:29:30+00:00'::timestamptz, '2026-01-01 09:30:45+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[158], 'takeoff', '2026-01-02 08:55:00+00:00'::timestamptz, '2026-01-02 08:57:00+00:00'::timestamptz, '2026-01-02 09:00:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[158], 'landing', '2026-01-02 09:38:00+00:00'::timestamptz, '2026-01-02 09:41:30+00:00'::timestamptz, '2026-01-02 09:43:00+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[159], 'takeoff', '2026-01-03 09:05:00+00:00'::timestamptz, '2026-01-03 09:07:00+00:00'::timestamptz, '2026-01-03 09:08:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[159], 'landing', '2026-01-03 09:49:00+00:00'::timestamptz, '2026-01-03 09:52:30+00:00'::timestamptz, '2026-01-03 09:54:15+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[160], 'takeoff', '2026-01-04 08:54:00+00:00'::timestamptz, '2026-01-04 08:56:00+00:00'::timestamptz, '2026-01-04 08:58:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[160], 'landing', '2026-01-04 09:28:00+00:00'::timestamptz, '2026-01-04 09:31:30+00:00'::timestamptz, '2026-01-04 09:32:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[161], 'takeoff', '2026-01-05 09:08:00+00:00'::timestamptz, '2026-01-05 09:10:00+00:00'::timestamptz, '2026-01-05 09:13:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[161], 'landing', '2026-01-05 09:45:00+00:00'::timestamptz, '2026-01-05 09:48:30+00:00'::timestamptz, '2026-01-05 09:49:45+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[162], 'takeoff', '2026-01-06 09:02:00+00:00'::timestamptz, '2026-01-06 09:04:00+00:00'::timestamptz, '2026-01-06 09:05:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[162], 'landing', '2026-01-06 09:53:00+00:00'::timestamptz, '2026-01-06 09:56:30+00:00'::timestamptz, '2026-01-06 09:58:00+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[163], 'takeoff', '2026-01-07 09:05:00+00:00'::timestamptz, '2026-01-07 09:07:00+00:00'::timestamptz, '2026-01-07 09:09:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[163], 'landing', '2026-01-07 09:57:00+00:00'::timestamptz, '2026-01-07 10:00:30+00:00'::timestamptz, '2026-01-07 10:02:15+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[164], 'takeoff', '2026-01-12 11:24:00+00:00'::timestamptz, '2026-01-12 11:26:00+00:00'::timestamptz, '2026-01-12 11:29:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[165], 'takeoff', '2026-01-01 09:05:00+00:00'::timestamptz, '2026-01-01 09:07:00+00:00'::timestamptz, '2026-01-01 09:08:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[165], 'landing', '2026-01-01 09:57:00+00:00'::timestamptz, '2026-01-01 10:00:30+00:00'::timestamptz, '2026-01-01 10:01:45+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[166], 'takeoff', '2026-01-02 09:17:00+00:00'::timestamptz, '2026-01-02 09:19:00+00:00'::timestamptz, '2026-01-02 09:21:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[166], 'landing', '2026-01-02 09:54:00+00:00'::timestamptz, '2026-01-02 09:57:30+00:00'::timestamptz, '2026-01-02 09:59:00+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[167], 'takeoff', '2026-01-03 09:12:00+00:00'::timestamptz, '2026-01-03 09:14:00+00:00'::timestamptz, '2026-01-03 09:17:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[167], 'landing', '2026-01-03 09:41:00+00:00'::timestamptz, '2026-01-03 09:44:30+00:00'::timestamptz, '2026-01-03 09:46:15+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[168], 'takeoff', '2026-01-04 09:06:00+00:00'::timestamptz, '2026-01-04 09:08:00+00:00'::timestamptz, '2026-01-04 09:09:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[168], 'landing', '2026-01-04 09:30:00+00:00'::timestamptz, '2026-01-04 09:33:30+00:00'::timestamptz, '2026-01-04 09:34:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[169], 'takeoff', '2026-01-05 09:07:00+00:00'::timestamptz, '2026-01-05 09:09:00+00:00'::timestamptz, '2026-01-05 09:11:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[169], 'landing', '2026-01-05 09:47:00+00:00'::timestamptz, '2026-01-05 09:50:30+00:00'::timestamptz, '2026-01-05 09:51:45+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[170], 'takeoff', '2026-01-06 09:12:00+00:00'::timestamptz, '2026-01-06 09:14:00+00:00'::timestamptz, '2026-01-06 09:17:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[170], 'landing', '2026-01-06 09:55:00+00:00'::timestamptz, '2026-01-06 09:58:30+00:00'::timestamptz, '2026-01-06 10:00:00+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[171], 'takeoff', '2026-01-07 09:13:00+00:00'::timestamptz, '2026-01-07 09:15:00+00:00'::timestamptz, '2026-01-07 09:16:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[171], 'landing', '2026-01-07 10:03:00+00:00'::timestamptz, '2026-01-07 10:06:30+00:00'::timestamptz, '2026-01-07 10:08:15+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[172], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[21], flight_ids[173], 'takeoff', '2026-01-01 05:56:00+00:00'::timestamptz, '2026-01-01 05:58:00+00:00'::timestamptz, '2026-01-01 06:01:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[173], 'landing', '2026-01-01 06:46:00+00:00'::timestamptz, '2026-01-01 06:49:30+00:00'::timestamptz, '2026-01-01 06:50:45+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[174], 'takeoff', '2026-01-02 06:12:00+00:00'::timestamptz, '2026-01-02 06:14:00+00:00'::timestamptz, '2026-01-02 06:15:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[174], 'landing', '2026-01-02 06:43:00+00:00'::timestamptz, '2026-01-02 06:46:30+00:00'::timestamptz, '2026-01-02 06:48:00+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[175], 'takeoff', '2026-01-03 05:57:00+00:00'::timestamptz, '2026-01-03 05:59:00+00:00'::timestamptz, '2026-01-03 06:01:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[175], 'landing', '2026-01-03 06:46:00+00:00'::timestamptz, '2026-01-03 06:49:30+00:00'::timestamptz, '2026-01-03 06:51:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[176], 'takeoff', '2026-01-04 06:05:00+00:00'::timestamptz, '2026-01-04 06:07:00+00:00'::timestamptz, '2026-01-04 06:10:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[176], 'landing', '2026-01-04 06:31:00+00:00'::timestamptz, '2026-01-04 06:34:30+00:00'::timestamptz, '2026-01-04 06:35:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[177], 'takeoff', '2026-01-05 06:09:00+00:00'::timestamptz, '2026-01-05 06:11:00+00:00'::timestamptz, '2026-01-05 06:12:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[177], 'landing', '2026-01-05 06:58:00+00:00'::timestamptz, '2026-01-05 07:01:30+00:00'::timestamptz, '2026-01-05 07:02:45+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[178], 'takeoff', '2026-01-06 05:55:00+00:00'::timestamptz, '2026-01-06 05:57:00+00:00'::timestamptz, '2026-01-06 05:59:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[178], 'landing', '2026-01-06 06:21:00+00:00'::timestamptz, '2026-01-06 06:24:30+00:00'::timestamptz, '2026-01-06 06:26:00+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[179], 'takeoff', '2026-01-07 06:00:00+00:00'::timestamptz, '2026-01-07 06:02:00+00:00'::timestamptz, '2026-01-07 06:05:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[179], 'landing', '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 06:54:30+00:00'::timestamptz, '2026-01-07 06:56:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[180], 'takeoff', '2026-01-12 09:57:00+00:00'::timestamptz, '2026-01-12 09:59:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[180], 'landing', '2026-01-12 10:32:00+00:00'::timestamptz, '2026-01-12 10:35:30+00:00'::timestamptz, '2026-01-12 10:36:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[181], 'takeoff', '2026-01-01 06:03:00+00:00'::timestamptz, '2026-01-01 06:05:00+00:00'::timestamptz, '2026-01-01 06:07:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[181], 'landing', '2026-01-01 06:47:00+00:00'::timestamptz, '2026-01-01 06:50:30+00:00'::timestamptz, '2026-01-01 06:51:45+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[182], 'takeoff', '2026-01-02 06:09:00+00:00'::timestamptz, '2026-01-02 06:11:00+00:00'::timestamptz, '2026-01-02 06:14:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[182], 'landing', '2026-01-02 06:55:00+00:00'::timestamptz, '2026-01-02 06:58:30+00:00'::timestamptz, '2026-01-02 07:00:00+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[183], 'takeoff', '2026-01-03 06:05:00+00:00'::timestamptz, '2026-01-03 06:07:00+00:00'::timestamptz, '2026-01-03 06:08:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[183], 'landing', '2026-01-03 06:59:00+00:00'::timestamptz, '2026-01-03 07:02:30+00:00'::timestamptz, '2026-01-03 07:04:15+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[184], 'takeoff', '2026-01-04 06:10:00+00:00'::timestamptz, '2026-01-04 06:12:00+00:00'::timestamptz, '2026-01-04 06:14:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[184], 'landing', '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 07:03:30+00:00'::timestamptz, '2026-01-04 07:04:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[185], 'takeoff', '2026-01-05 06:10:00+00:00'::timestamptz, '2026-01-05 06:12:00+00:00'::timestamptz, '2026-01-05 06:15:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[185], 'landing', '2026-01-05 06:40:00+00:00'::timestamptz, '2026-01-05 06:43:30+00:00'::timestamptz, '2026-01-05 06:44:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[186], 'takeoff', '2026-01-06 06:04:00+00:00'::timestamptz, '2026-01-06 06:06:00+00:00'::timestamptz, '2026-01-06 06:07:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[186], 'landing', '2026-01-06 06:35:00+00:00'::timestamptz, '2026-01-06 06:38:30+00:00'::timestamptz, '2026-01-06 06:40:00+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[187], 'takeoff', '2026-01-07 06:04:00+00:00'::timestamptz, '2026-01-07 06:06:00+00:00'::timestamptz, '2026-01-07 06:08:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[187], 'landing', '2026-01-07 06:48:00+00:00'::timestamptz, '2026-01-07 06:51:30+00:00'::timestamptz, '2026-01-07 06:53:15+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[188], 'takeoff', '2026-01-12 11:45:00+00:00'::timestamptz, '2026-01-12 11:47:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[189], 'takeoff', '2026-01-01 06:28:00+00:00'::timestamptz, '2026-01-01 06:30:00+00:00'::timestamptz, '2026-01-01 06:31:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[189], 'landing', '2026-01-01 07:07:00+00:00'::timestamptz, '2026-01-01 07:10:30+00:00'::timestamptz, '2026-01-01 07:11:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[190], 'takeoff', '2026-01-02 06:23:00+00:00'::timestamptz, '2026-01-02 06:25:00+00:00'::timestamptz, '2026-01-02 06:27:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[190], 'landing', '2026-01-02 07:13:00+00:00'::timestamptz, '2026-01-02 07:16:30+00:00'::timestamptz, '2026-01-02 07:18:00+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[191], 'takeoff', '2026-01-03 06:17:00+00:00'::timestamptz, '2026-01-03 06:19:00+00:00'::timestamptz, '2026-01-03 06:22:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[191], 'landing', '2026-01-03 07:07:00+00:00'::timestamptz, '2026-01-03 07:10:30+00:00'::timestamptz, '2026-01-03 07:12:15+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[192], 'takeoff', '2026-01-04 06:14:00+00:00'::timestamptz, '2026-01-04 06:16:00+00:00'::timestamptz, '2026-01-04 06:17:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[192], 'landing', '2026-01-04 06:55:00+00:00'::timestamptz, '2026-01-04 06:58:30+00:00'::timestamptz, '2026-01-04 06:59:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[193], 'takeoff', '2026-01-05 06:23:00+00:00'::timestamptz, '2026-01-05 06:25:00+00:00'::timestamptz, '2026-01-05 06:27:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[193], 'landing', '2026-01-05 07:13:00+00:00'::timestamptz, '2026-01-05 07:16:30+00:00'::timestamptz, '2026-01-05 07:17:45+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[194], 'takeoff', '2026-01-06 06:30:00+00:00'::timestamptz, '2026-01-06 06:32:00+00:00'::timestamptz, '2026-01-06 06:35:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[194], 'landing', '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:13:30+00:00'::timestamptz, '2026-01-06 07:15:00+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[195], 'takeoff', '2026-01-07 06:19:00+00:00'::timestamptz, '2026-01-07 06:21:00+00:00'::timestamptz, '2026-01-07 06:22:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[195], 'landing', '2026-01-07 06:48:00+00:00'::timestamptz, '2026-01-07 06:51:30+00:00'::timestamptz, '2026-01-07 06:53:15+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[196], 'takeoff', '2026-01-12 11:11:00+00:00'::timestamptz, '2026-01-12 11:13:00+00:00'::timestamptz, '2026-01-12 11:15:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[197], 'takeoff', '2026-01-01 06:28:00+00:00'::timestamptz, '2026-01-01 06:30:00+00:00'::timestamptz, '2026-01-01 06:33:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[197], 'landing', '2026-01-01 06:55:00+00:00'::timestamptz, '2026-01-01 06:58:30+00:00'::timestamptz, '2026-01-01 06:59:45+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[198], 'takeoff', '2026-01-02 06:35:00+00:00'::timestamptz, '2026-01-02 06:37:00+00:00'::timestamptz, '2026-01-02 06:38:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[198], 'landing', '2026-01-02 07:27:00+00:00'::timestamptz, '2026-01-02 07:30:30+00:00'::timestamptz, '2026-01-02 07:32:00+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[199], 'takeoff', '2026-01-03 06:25:00+00:00'::timestamptz, '2026-01-03 06:27:00+00:00'::timestamptz, '2026-01-03 06:29:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[199], 'landing', '2026-01-03 07:16:00+00:00'::timestamptz, '2026-01-03 07:19:30+00:00'::timestamptz, '2026-01-03 07:21:15+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[200], 'takeoff', '2026-01-04 06:28:00+00:00'::timestamptz, '2026-01-04 06:30:00+00:00'::timestamptz, '2026-01-04 06:33:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[200], 'landing', '2026-01-04 07:10:00+00:00'::timestamptz, '2026-01-04 07:13:30+00:00'::timestamptz, '2026-01-04 07:14:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[201], 'takeoff', '2026-01-05 06:25:00+00:00'::timestamptz, '2026-01-05 06:27:00+00:00'::timestamptz, '2026-01-05 06:28:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[201], 'landing', '2026-01-05 07:03:00+00:00'::timestamptz, '2026-01-05 07:06:30+00:00'::timestamptz, '2026-01-05 07:07:45+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[202], 'takeoff', '2026-01-06 06:39:00+00:00'::timestamptz, '2026-01-06 06:41:00+00:00'::timestamptz, '2026-01-06 06:43:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[202], 'landing', '2026-01-06 07:26:00+00:00'::timestamptz, '2026-01-06 07:29:30+00:00'::timestamptz, '2026-01-06 07:31:00+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[203], 'takeoff', '2026-01-07 06:35:00+00:00'::timestamptz, '2026-01-07 06:37:00+00:00'::timestamptz, '2026-01-07 06:40:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[203], 'landing', '2026-01-07 07:04:00+00:00'::timestamptz, '2026-01-07 07:07:30+00:00'::timestamptz, '2026-01-07 07:09:15+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[204], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[41], flight_ids[205], 'takeoff', '2026-01-01 06:51:00+00:00'::timestamptz, '2026-01-01 06:53:00+00:00'::timestamptz, '2026-01-01 06:55:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[205], 'landing', '2026-01-01 07:20:00+00:00'::timestamptz, '2026-01-01 07:23:30+00:00'::timestamptz, '2026-01-01 07:24:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[206], 'takeoff', '2026-01-02 06:39:00+00:00'::timestamptz, '2026-01-02 06:41:00+00:00'::timestamptz, '2026-01-02 06:44:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[206], 'landing', '2026-01-02 07:29:00+00:00'::timestamptz, '2026-01-02 07:32:30+00:00'::timestamptz, '2026-01-02 07:34:00+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[207], 'takeoff', '2026-01-03 06:50:00+00:00'::timestamptz, '2026-01-03 06:52:00+00:00'::timestamptz, '2026-01-03 06:53:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[207], 'landing', '2026-01-03 07:31:00+00:00'::timestamptz, '2026-01-03 07:34:30+00:00'::timestamptz, '2026-01-03 07:36:15+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[208], 'takeoff', '2026-01-04 06:37:00+00:00'::timestamptz, '2026-01-04 06:39:00+00:00'::timestamptz, '2026-01-04 06:41:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[208], 'landing', '2026-01-04 07:06:00+00:00'::timestamptz, '2026-01-04 07:09:30+00:00'::timestamptz, '2026-01-04 07:10:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[209], 'takeoff', '2026-01-05 06:36:00+00:00'::timestamptz, '2026-01-05 06:38:00+00:00'::timestamptz, '2026-01-05 06:41:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[209], 'landing', '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:33:30+00:00'::timestamptz, '2026-01-05 07:34:45+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[210], 'takeoff', '2026-01-06 06:41:00+00:00'::timestamptz, '2026-01-06 06:43:00+00:00'::timestamptz, '2026-01-06 06:44:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[210], 'landing', '2026-01-06 07:13:00+00:00'::timestamptz, '2026-01-06 07:16:30+00:00'::timestamptz, '2026-01-06 07:18:00+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[211], 'takeoff', '2026-01-07 06:47:00+00:00'::timestamptz, '2026-01-07 06:49:00+00:00'::timestamptz, '2026-01-07 06:51:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[211], 'landing', '2026-01-07 07:42:00+00:00'::timestamptz, '2026-01-07 07:45:30+00:00'::timestamptz, '2026-01-07 07:47:15+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[212], 'takeoff', '2026-01-12 09:55:00+00:00'::timestamptz, '2026-01-12 09:57:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[212], 'landing', '2026-01-12 10:27:00+00:00'::timestamptz, '2026-01-12 10:30:30+00:00'::timestamptz, '2026-01-12 10:31:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[213], 'takeoff', '2026-01-01 06:54:00+00:00'::timestamptz, '2026-01-01 06:56:00+00:00'::timestamptz, '2026-01-01 06:57:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[213], 'landing', '2026-01-01 07:44:00+00:00'::timestamptz, '2026-01-01 07:47:30+00:00'::timestamptz, '2026-01-01 07:48:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[214], 'takeoff', '2026-01-02 06:51:00+00:00'::timestamptz, '2026-01-02 06:53:00+00:00'::timestamptz, '2026-01-02 06:55:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[214], 'landing', '2026-01-02 07:45:00+00:00'::timestamptz, '2026-01-02 07:48:30+00:00'::timestamptz, '2026-01-02 07:50:00+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[215], 'takeoff', '2026-01-03 06:56:00+00:00'::timestamptz, '2026-01-03 06:58:00+00:00'::timestamptz, '2026-01-03 07:01:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[215], 'landing', '2026-01-03 07:30:00+00:00'::timestamptz, '2026-01-03 07:33:30+00:00'::timestamptz, '2026-01-03 07:35:15+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[216], 'takeoff', '2026-01-04 06:49:00+00:00'::timestamptz, '2026-01-04 06:51:00+00:00'::timestamptz, '2026-01-04 06:52:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[216], 'landing', '2026-01-04 07:13:00+00:00'::timestamptz, '2026-01-04 07:16:30+00:00'::timestamptz, '2026-01-04 07:17:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[217], 'takeoff', '2026-01-05 06:50:00+00:00'::timestamptz, '2026-01-05 06:52:00+00:00'::timestamptz, '2026-01-05 06:54:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[217], 'landing', '2026-01-05 07:28:00+00:00'::timestamptz, '2026-01-05 07:31:30+00:00'::timestamptz, '2026-01-05 07:32:45+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[218], 'takeoff', '2026-01-06 06:48:00+00:00'::timestamptz, '2026-01-06 06:50:00+00:00'::timestamptz, '2026-01-06 06:53:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[218], 'landing', '2026-01-06 07:32:00+00:00'::timestamptz, '2026-01-06 07:35:30+00:00'::timestamptz, '2026-01-06 07:37:00+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[219], 'takeoff', '2026-01-07 06:49:00+00:00'::timestamptz, '2026-01-07 06:51:00+00:00'::timestamptz, '2026-01-07 06:52:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[219], 'landing', '2026-01-07 07:20:00+00:00'::timestamptz, '2026-01-07 07:23:30+00:00'::timestamptz, '2026-01-07 07:25:15+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[220], 'takeoff', '2026-01-12 11:46:00+00:00'::timestamptz, '2026-01-12 11:48:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[221], 'takeoff', '2026-01-01 06:54:00+00:00'::timestamptz, '2026-01-01 06:56:00+00:00'::timestamptz, '2026-01-01 06:59:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[221], 'landing', '2026-01-01 07:46:00+00:00'::timestamptz, '2026-01-01 07:49:30+00:00'::timestamptz, '2026-01-01 07:50:45+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[222], 'takeoff', '2026-01-02 06:59:00+00:00'::timestamptz, '2026-01-02 07:01:00+00:00'::timestamptz, '2026-01-02 07:02:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[222], 'landing', '2026-01-02 07:39:00+00:00'::timestamptz, '2026-01-02 07:42:30+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[223], 'takeoff', '2026-01-03 07:08:00+00:00'::timestamptz, '2026-01-03 07:10:00+00:00'::timestamptz, '2026-01-03 07:12:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[223], 'landing', '2026-01-03 07:49:00+00:00'::timestamptz, '2026-01-03 07:52:30+00:00'::timestamptz, '2026-01-03 07:54:15+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[224], 'takeoff', '2026-01-04 07:06:00+00:00'::timestamptz, '2026-01-04 07:08:00+00:00'::timestamptz, '2026-01-04 07:11:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[224], 'landing', '2026-01-04 07:38:00+00:00'::timestamptz, '2026-01-04 07:41:30+00:00'::timestamptz, '2026-01-04 07:42:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[225], 'takeoff', '2026-01-05 07:04:00+00:00'::timestamptz, '2026-01-05 07:06:00+00:00'::timestamptz, '2026-01-05 07:07:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[225], 'landing', '2026-01-05 07:30:00+00:00'::timestamptz, '2026-01-05 07:33:30+00:00'::timestamptz, '2026-01-05 07:34:45+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[226], 'takeoff', '2026-01-06 07:07:00+00:00'::timestamptz, '2026-01-06 07:09:00+00:00'::timestamptz, '2026-01-06 07:11:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[226], 'landing', '2026-01-06 07:40:00+00:00'::timestamptz, '2026-01-06 07:43:30+00:00'::timestamptz, '2026-01-06 07:45:00+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[227], 'takeoff', '2026-01-07 07:10:00+00:00'::timestamptz, '2026-01-07 07:12:00+00:00'::timestamptz, '2026-01-07 07:15:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[227], 'landing', '2026-01-07 07:59:00+00:00'::timestamptz, '2026-01-07 08:02:30+00:00'::timestamptz, '2026-01-07 08:04:15+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[228], 'takeoff', '2026-01-12 11:13:00+00:00'::timestamptz, '2026-01-12 11:15:00+00:00'::timestamptz, '2026-01-12 11:16:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[229], 'takeoff', '2026-01-01 07:11:00+00:00'::timestamptz, '2026-01-01 07:13:00+00:00'::timestamptz, '2026-01-01 07:15:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[229], 'landing', '2026-01-01 07:41:00+00:00'::timestamptz, '2026-01-01 07:44:30+00:00'::timestamptz, '2026-01-01 07:45:45+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[230], 'takeoff', '2026-01-02 07:04:00+00:00'::timestamptz, '2026-01-02 07:06:00+00:00'::timestamptz, '2026-01-02 07:09:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[230], 'landing', '2026-01-02 07:52:00+00:00'::timestamptz, '2026-01-02 07:55:30+00:00'::timestamptz, '2026-01-02 07:57:00+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[231], 'takeoff', '2026-01-03 07:19:00+00:00'::timestamptz, '2026-01-03 07:21:00+00:00'::timestamptz, '2026-01-03 07:22:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[231], 'landing', '2026-01-03 07:46:00+00:00'::timestamptz, '2026-01-03 07:49:30+00:00'::timestamptz, '2026-01-03 07:51:15+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[232], 'takeoff', '2026-01-04 07:15:00+00:00'::timestamptz, '2026-01-04 07:17:00+00:00'::timestamptz, '2026-01-04 07:19:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[232], 'landing', '2026-01-04 08:09:00+00:00'::timestamptz, '2026-01-04 08:12:30+00:00'::timestamptz, '2026-01-04 08:13:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[233], 'takeoff', '2026-01-05 07:13:00+00:00'::timestamptz, '2026-01-05 07:15:00+00:00'::timestamptz, '2026-01-05 07:18:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[233], 'landing', '2026-01-05 08:04:00+00:00'::timestamptz, '2026-01-05 08:07:30+00:00'::timestamptz, '2026-01-05 08:08:45+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[234], 'takeoff', '2026-01-06 07:08:00+00:00'::timestamptz, '2026-01-06 07:10:00+00:00'::timestamptz, '2026-01-06 07:11:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[234], 'landing', '2026-01-06 07:36:00+00:00'::timestamptz, '2026-01-06 07:39:30+00:00'::timestamptz, '2026-01-06 07:41:00+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[235], 'takeoff', '2026-01-07 07:03:00+00:00'::timestamptz, '2026-01-07 07:05:00+00:00'::timestamptz, '2026-01-07 07:07:30+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[235], 'landing', '2026-01-07 07:52:00+00:00'::timestamptz, '2026-01-07 07:55:30+00:00'::timestamptz, '2026-01-07 07:57:15+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[236], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[15], flight_ids[237], 'takeoff', '2026-01-01 07:21:00+00:00'::timestamptz, '2026-01-01 07:23:00+00:00'::timestamptz, '2026-01-01 07:24:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[237], 'landing', '2026-01-01 07:57:00+00:00'::timestamptz, '2026-01-01 08:00:30+00:00'::timestamptz, '2026-01-01 08:01:45+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[238], 'takeoff', '2026-01-02 07:20:00+00:00'::timestamptz, '2026-01-02 07:22:00+00:00'::timestamptz, '2026-01-02 07:24:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[238], 'landing', '2026-01-02 07:57:00+00:00'::timestamptz, '2026-01-02 08:00:30+00:00'::timestamptz, '2026-01-02 08:02:00+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[239], 'takeoff', '2026-01-03 07:19:00+00:00'::timestamptz, '2026-01-03 07:21:00+00:00'::timestamptz, '2026-01-03 07:24:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[239], 'landing', '2026-01-03 07:49:00+00:00'::timestamptz, '2026-01-03 07:52:30+00:00'::timestamptz, '2026-01-03 07:54:15+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[240], 'takeoff', '2026-01-04 07:31:00+00:00'::timestamptz, '2026-01-04 07:33:00+00:00'::timestamptz, '2026-01-04 07:34:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[240], 'landing', '2026-01-04 07:56:00+00:00'::timestamptz, '2026-01-04 07:59:30+00:00'::timestamptz, '2026-01-04 08:00:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[241], 'takeoff', '2026-01-05 07:13:00+00:00'::timestamptz, '2026-01-05 07:15:00+00:00'::timestamptz, '2026-01-05 07:17:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[241], 'landing', '2026-01-05 07:56:00+00:00'::timestamptz, '2026-01-05 07:59:30+00:00'::timestamptz, '2026-01-05 08:00:45+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[242], 'takeoff', '2026-01-06 07:17:00+00:00'::timestamptz, '2026-01-06 07:19:00+00:00'::timestamptz, '2026-01-06 07:22:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[242], 'landing', '2026-01-06 07:58:00+00:00'::timestamptz, '2026-01-06 08:01:30+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[243], 'takeoff', '2026-01-07 07:16:00+00:00'::timestamptz, '2026-01-07 07:18:00+00:00'::timestamptz, '2026-01-07 07:19:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[243], 'landing', '2026-01-07 07:47:00+00:00'::timestamptz, '2026-01-07 07:50:30+00:00'::timestamptz, '2026-01-07 07:52:15+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[244], 'takeoff', '2026-01-12 09:56:00+00:00'::timestamptz, '2026-01-12 09:58:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[244], 'landing', '2026-01-12 10:33:00+00:00'::timestamptz, '2026-01-12 10:36:30+00:00'::timestamptz, '2026-01-12 10:37:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[245], 'takeoff', '2026-01-01 07:33:00+00:00'::timestamptz, '2026-01-01 07:35:00+00:00'::timestamptz, '2026-01-01 07:38:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[245], 'landing', '2026-01-01 08:25:00+00:00'::timestamptz, '2026-01-01 08:28:30+00:00'::timestamptz, '2026-01-01 08:29:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[246], 'takeoff', '2026-01-02 07:42:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, '2026-01-02 07:45:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[246], 'landing', '2026-01-02 08:34:00+00:00'::timestamptz, '2026-01-02 08:37:30+00:00'::timestamptz, '2026-01-02 08:39:00+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[247], 'takeoff', '2026-01-03 07:25:00+00:00'::timestamptz, '2026-01-03 07:27:00+00:00'::timestamptz, '2026-01-03 07:29:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[247], 'landing', '2026-01-03 08:17:00+00:00'::timestamptz, '2026-01-03 08:20:30+00:00'::timestamptz, '2026-01-03 08:22:15+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[248], 'takeoff', '2026-01-04 07:37:00+00:00'::timestamptz, '2026-01-04 07:39:00+00:00'::timestamptz, '2026-01-04 07:42:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[248], 'landing', '2026-01-04 08:31:00+00:00'::timestamptz, '2026-01-04 08:34:30+00:00'::timestamptz, '2026-01-04 08:35:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[249], 'takeoff', '2026-01-05 07:39:00+00:00'::timestamptz, '2026-01-05 07:41:00+00:00'::timestamptz, '2026-01-05 07:42:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[249], 'landing', '2026-01-05 08:12:00+00:00'::timestamptz, '2026-01-05 08:15:30+00:00'::timestamptz, '2026-01-05 08:16:45+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[250], 'takeoff', '2026-01-06 07:30:00+00:00'::timestamptz, '2026-01-06 07:32:00+00:00'::timestamptz, '2026-01-06 07:34:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[250], 'landing', '2026-01-06 08:13:00+00:00'::timestamptz, '2026-01-06 08:16:30+00:00'::timestamptz, '2026-01-06 08:18:00+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[251], 'takeoff', '2026-01-07 07:30:00+00:00'::timestamptz, '2026-01-07 07:32:00+00:00'::timestamptz, '2026-01-07 07:35:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[251], 'landing', '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:23:30+00:00'::timestamptz, '2026-01-07 08:25:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[252], 'takeoff', '2026-01-12 11:47:00+00:00'::timestamptz, '2026-01-12 11:49:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[253], 'takeoff', '2026-01-01 07:38:00+00:00'::timestamptz, '2026-01-01 07:40:00+00:00'::timestamptz, '2026-01-01 07:42:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[253], 'landing', '2026-01-01 08:25:00+00:00'::timestamptz, '2026-01-01 08:28:30+00:00'::timestamptz, '2026-01-01 08:29:45+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[254], 'takeoff', '2026-01-02 07:39:00+00:00'::timestamptz, '2026-01-02 07:41:00+00:00'::timestamptz, '2026-01-02 07:44:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[254], 'landing', '2026-01-02 08:29:00+00:00'::timestamptz, '2026-01-02 08:32:30+00:00'::timestamptz, '2026-01-02 08:34:00+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[255], 'takeoff', '2026-01-03 07:34:00+00:00'::timestamptz, '2026-01-03 07:36:00+00:00'::timestamptz, '2026-01-03 07:37:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[255], 'landing', '2026-01-03 08:23:00+00:00'::timestamptz, '2026-01-03 08:26:30+00:00'::timestamptz, '2026-01-03 08:28:15+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[256], 'takeoff', '2026-01-04 07:40:00+00:00'::timestamptz, '2026-01-04 07:42:00+00:00'::timestamptz, '2026-01-04 07:44:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[256], 'landing', '2026-01-04 08:21:00+00:00'::timestamptz, '2026-01-04 08:24:30+00:00'::timestamptz, '2026-01-04 08:25:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[257], 'takeoff', '2026-01-05 07:44:00+00:00'::timestamptz, '2026-01-05 07:46:00+00:00'::timestamptz, '2026-01-05 07:49:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[257], 'landing', '2026-01-05 08:32:00+00:00'::timestamptz, '2026-01-05 08:35:30+00:00'::timestamptz, '2026-01-05 08:36:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[258], 'takeoff', '2026-01-06 07:46:00+00:00'::timestamptz, '2026-01-06 07:48:00+00:00'::timestamptz, '2026-01-06 07:49:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[258], 'landing', '2026-01-06 08:36:00+00:00'::timestamptz, '2026-01-06 08:39:30+00:00'::timestamptz, '2026-01-06 08:41:00+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[259], 'takeoff', '2026-01-07 07:48:00+00:00'::timestamptz, '2026-01-07 07:50:00+00:00'::timestamptz, '2026-01-07 07:52:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[259], 'landing', '2026-01-07 08:16:00+00:00'::timestamptz, '2026-01-07 08:19:30+00:00'::timestamptz, '2026-01-07 08:21:15+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[260], 'takeoff', '2026-01-12 11:07:00+00:00'::timestamptz, '2026-01-12 11:09:00+00:00'::timestamptz, '2026-01-12 11:12:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[261], 'takeoff', '2026-01-01 07:46:00+00:00'::timestamptz, '2026-01-01 07:48:00+00:00'::timestamptz, '2026-01-01 07:49:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[261], 'landing', '2026-01-01 08:25:00+00:00'::timestamptz, '2026-01-01 08:28:30+00:00'::timestamptz, '2026-01-01 08:29:45+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[262], 'takeoff', '2026-01-02 08:00:00+00:00'::timestamptz, '2026-01-02 08:02:00+00:00'::timestamptz, '2026-01-02 08:04:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[262], 'landing', '2026-01-02 08:53:00+00:00'::timestamptz, '2026-01-02 08:56:30+00:00'::timestamptz, '2026-01-02 08:58:00+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[263], 'takeoff', '2026-01-03 07:56:00+00:00'::timestamptz, '2026-01-03 07:58:00+00:00'::timestamptz, '2026-01-03 08:01:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[263], 'landing', '2026-01-03 08:37:00+00:00'::timestamptz, '2026-01-03 08:40:30+00:00'::timestamptz, '2026-01-03 08:42:15+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[264], 'takeoff', '2026-01-04 07:47:00+00:00'::timestamptz, '2026-01-04 07:49:00+00:00'::timestamptz, '2026-01-04 07:50:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[264], 'landing', '2026-01-04 08:24:00+00:00'::timestamptz, '2026-01-04 08:27:30+00:00'::timestamptz, '2026-01-04 08:28:30+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[265], 'takeoff', '2026-01-05 07:46:00+00:00'::timestamptz, '2026-01-05 07:48:00+00:00'::timestamptz, '2026-01-05 07:50:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[265], 'landing', '2026-01-05 08:39:00+00:00'::timestamptz, '2026-01-05 08:42:30+00:00'::timestamptz, '2026-01-05 08:43:45+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[266], 'takeoff', '2026-01-06 07:58:00+00:00'::timestamptz, '2026-01-06 08:00:00+00:00'::timestamptz, '2026-01-06 08:03:30+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[266], 'landing', '2026-01-06 08:41:00+00:00'::timestamptz, '2026-01-06 08:44:30+00:00'::timestamptz, '2026-01-06 08:46:00+00:00'::timestamptz),
+        (journaling_object_ids[30], flight_ids[267], 'takeoff', '2026-01-07 07:44:00+00:00'::timestamptz, '2026-01-07 07:46:00+00:00'::timestamptz, '2026-01-07 07:47:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[267], 'landing', '2026-01-07 08:20:00+00:00'::timestamptz, '2026-01-07 08:23:30+00:00'::timestamptz, '2026-01-07 08:25:15+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[268], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL),
+        (journaling_object_ids[36], flight_ids[269], 'takeoff', '2026-01-01 08:07:00+00:00'::timestamptz, '2026-01-01 08:09:00+00:00'::timestamptz, '2026-01-01 08:12:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[269], 'landing', '2026-01-01 08:50:00+00:00'::timestamptz, '2026-01-01 08:53:30+00:00'::timestamptz, '2026-01-01 08:54:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[270], 'takeoff', '2026-01-02 07:57:00+00:00'::timestamptz, '2026-01-02 07:59:00+00:00'::timestamptz, '2026-01-02 08:00:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[270], 'landing', '2026-01-02 08:31:00+00:00'::timestamptz, '2026-01-02 08:34:30+00:00'::timestamptz, '2026-01-02 08:36:00+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[271], 'takeoff', '2026-01-03 07:53:00+00:00'::timestamptz, '2026-01-03 07:55:00+00:00'::timestamptz, '2026-01-03 07:57:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[271], 'landing', '2026-01-03 08:34:00+00:00'::timestamptz, '2026-01-03 08:37:30+00:00'::timestamptz, '2026-01-03 08:39:15+00:00'::timestamptz),
+        (journaling_object_ids[50], flight_ids[272], 'takeoff', '2026-01-04 08:01:00+00:00'::timestamptz, '2026-01-04 08:03:00+00:00'::timestamptz, '2026-01-04 08:06:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[272], 'landing', '2026-01-04 08:34:00+00:00'::timestamptz, '2026-01-04 08:37:30+00:00'::timestamptz, '2026-01-04 08:38:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[273], 'takeoff', '2026-01-05 07:56:00+00:00'::timestamptz, '2026-01-05 07:58:00+00:00'::timestamptz, '2026-01-05 07:59:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[273], 'landing', '2026-01-05 08:38:00+00:00'::timestamptz, '2026-01-05 08:41:30+00:00'::timestamptz, '2026-01-05 08:42:45+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[274], 'takeoff', '2026-01-06 08:09:00+00:00'::timestamptz, '2026-01-06 08:11:00+00:00'::timestamptz, '2026-01-06 08:13:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[274], 'landing', '2026-01-06 08:39:00+00:00'::timestamptz, '2026-01-06 08:42:30+00:00'::timestamptz, '2026-01-06 08:44:00+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[275], 'takeoff', '2026-01-07 08:04:00+00:00'::timestamptz, '2026-01-07 08:06:00+00:00'::timestamptz, '2026-01-07 08:09:30+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[275], 'landing', '2026-01-07 08:41:00+00:00'::timestamptz, '2026-01-07 08:44:30+00:00'::timestamptz, '2026-01-07 08:46:15+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[276], 'takeoff', '2026-01-12 09:57:00+00:00'::timestamptz, '2026-01-12 09:59:00+00:00'::timestamptz, '2026-01-12 10:00:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[276], 'landing', '2026-01-12 10:25:00+00:00'::timestamptz, '2026-01-12 10:28:30+00:00'::timestamptz, '2026-01-12 10:29:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[277], 'takeoff', '2026-01-01 08:16:00+00:00'::timestamptz, '2026-01-01 08:18:00+00:00'::timestamptz, '2026-01-01 08:20:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[277], 'landing', '2026-01-01 09:11:00+00:00'::timestamptz, '2026-01-01 09:14:30+00:00'::timestamptz, '2026-01-01 09:15:45+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[278], 'takeoff', '2026-01-02 08:15:00+00:00'::timestamptz, '2026-01-02 08:17:00+00:00'::timestamptz, '2026-01-02 08:20:30+00:00'::timestamptz),
+        (journaling_object_ids[21], flight_ids[278], 'landing', '2026-01-02 08:41:00+00:00'::timestamptz, '2026-01-02 08:44:30+00:00'::timestamptz, '2026-01-02 08:46:00+00:00'::timestamptz),
+        (journaling_object_ids[20], flight_ids[279], 'takeoff', '2026-01-03 08:14:00+00:00'::timestamptz, '2026-01-03 08:16:00+00:00'::timestamptz, '2026-01-03 08:17:30+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[279], 'landing', '2026-01-03 08:46:00+00:00'::timestamptz, '2026-01-03 08:49:30+00:00'::timestamptz, '2026-01-03 08:51:15+00:00'::timestamptz),
+        (journaling_object_ids[15], flight_ids[280], 'takeoff', '2026-01-04 08:11:00+00:00'::timestamptz, '2026-01-04 08:13:00+00:00'::timestamptz, '2026-01-04 08:15:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[280], 'landing', '2026-01-04 09:04:00+00:00'::timestamptz, '2026-01-04 09:07:30+00:00'::timestamptz, '2026-01-04 09:08:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[281], 'takeoff', '2026-01-05 08:02:00+00:00'::timestamptz, '2026-01-05 08:04:00+00:00'::timestamptz, '2026-01-05 08:07:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[281], 'landing', '2026-01-05 08:58:00+00:00'::timestamptz, '2026-01-05 09:01:30+00:00'::timestamptz, '2026-01-05 09:02:45+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[282], 'takeoff', '2026-01-06 08:14:00+00:00'::timestamptz, '2026-01-06 08:16:00+00:00'::timestamptz, '2026-01-06 08:17:30+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[282], 'landing', '2026-01-06 08:51:00+00:00'::timestamptz, '2026-01-06 08:54:30+00:00'::timestamptz, '2026-01-06 08:56:00+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[283], 'takeoff', '2026-01-07 08:06:00+00:00'::timestamptz, '2026-01-07 08:08:00+00:00'::timestamptz, '2026-01-07 08:10:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[283], 'landing', '2026-01-07 08:59:00+00:00'::timestamptz, '2026-01-07 09:02:30+00:00'::timestamptz, '2026-01-07 09:04:15+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[284], 'takeoff', '2026-01-12 11:45:00+00:00'::timestamptz, '2026-01-12 11:47:00+00:00'::timestamptz, '2026-01-12 11:50:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[285], 'takeoff', '2026-01-01 08:30:00+00:00'::timestamptz, '2026-01-01 08:32:00+00:00'::timestamptz, '2026-01-01 08:33:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[285], 'landing', '2026-01-01 09:18:00+00:00'::timestamptz, '2026-01-01 09:21:30+00:00'::timestamptz, '2026-01-01 09:22:45+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[286], 'takeoff', '2026-01-02 08:28:00+00:00'::timestamptz, '2026-01-02 08:30:00+00:00'::timestamptz, '2026-01-02 08:32:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[286], 'landing', '2026-01-02 09:01:00+00:00'::timestamptz, '2026-01-02 09:04:30+00:00'::timestamptz, '2026-01-02 09:06:00+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[287], 'takeoff', '2026-01-03 08:20:00+00:00'::timestamptz, '2026-01-03 08:22:00+00:00'::timestamptz, '2026-01-03 08:25:30+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[287], 'landing', '2026-01-03 09:15:00+00:00'::timestamptz, '2026-01-03 09:18:30+00:00'::timestamptz, '2026-01-03 09:20:15+00:00'::timestamptz),
+        (journaling_object_ids[40], flight_ids[288], 'takeoff', '2026-01-04 08:18:00+00:00'::timestamptz, '2026-01-04 08:20:00+00:00'::timestamptz, '2026-01-04 08:21:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[288], 'landing', '2026-01-04 08:49:00+00:00'::timestamptz, '2026-01-04 08:52:30+00:00'::timestamptz, '2026-01-04 08:53:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[289], 'takeoff', '2026-01-05 08:31:00+00:00'::timestamptz, '2026-01-05 08:33:00+00:00'::timestamptz, '2026-01-05 08:35:30+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[289], 'landing', '2026-01-05 09:03:00+00:00'::timestamptz, '2026-01-05 09:06:30+00:00'::timestamptz, '2026-01-05 09:07:45+00:00'::timestamptz),
+        (journaling_object_ids[16], flight_ids[290], 'takeoff', '2026-01-06 08:22:00+00:00'::timestamptz, '2026-01-06 08:24:00+00:00'::timestamptz, '2026-01-06 08:27:30+00:00'::timestamptz),
+        (journaling_object_ids[46], flight_ids[290], 'landing', '2026-01-06 09:11:00+00:00'::timestamptz, '2026-01-06 09:14:30+00:00'::timestamptz, '2026-01-06 09:16:00+00:00'::timestamptz),
+        (journaling_object_ids[45], flight_ids[291], 'takeoff', '2026-01-07 08:15:00+00:00'::timestamptz, '2026-01-07 08:17:00+00:00'::timestamptz, '2026-01-07 08:18:30+00:00'::timestamptz),
+        (journaling_object_ids[36], flight_ids[291], 'landing', '2026-01-07 09:09:00+00:00'::timestamptz, '2026-01-07 09:12:30+00:00'::timestamptz, '2026-01-07 09:14:15+00:00'::timestamptz),
+        (journaling_object_ids[35], flight_ids[292], 'takeoff', '2026-01-12 11:05:00+00:00'::timestamptz, '2026-01-12 11:07:00+00:00'::timestamptz, '2026-01-12 11:09:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[293], 'takeoff', '2026-01-01 08:39:00+00:00'::timestamptz, '2026-01-01 08:41:00+00:00'::timestamptz, '2026-01-01 08:44:30+00:00'::timestamptz),
+        (journaling_object_ids[10], flight_ids[293], 'landing', '2026-01-01 09:15:00+00:00'::timestamptz, '2026-01-01 09:18:30+00:00'::timestamptz, '2026-01-01 09:19:45+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[294], 'takeoff', '2026-01-02 08:42:00+00:00'::timestamptz, '2026-01-02 08:44:00+00:00'::timestamptz, '2026-01-02 08:45:30+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[294], 'landing', '2026-01-02 09:30:00+00:00'::timestamptz, '2026-01-02 09:33:30+00:00'::timestamptz, '2026-01-02 09:35:00+00:00'::timestamptz),
+        (journaling_object_ids[31], flight_ids[295], 'takeoff', '2026-01-03 08:32:00+00:00'::timestamptz, '2026-01-03 08:34:00+00:00'::timestamptz, '2026-01-03 08:36:30+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[295], 'landing', '2026-01-03 09:15:00+00:00'::timestamptz, '2026-01-03 09:18:30+00:00'::timestamptz, '2026-01-03 09:20:15+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[296], 'takeoff', '2026-01-04 08:27:00+00:00'::timestamptz, '2026-01-04 08:29:00+00:00'::timestamptz, '2026-01-04 08:32:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[296], 'landing', '2026-01-04 09:20:00+00:00'::timestamptz, '2026-01-04 09:23:30+00:00'::timestamptz, '2026-01-04 09:24:30+00:00'::timestamptz),
+        (journaling_object_ids[11], flight_ids[297], 'takeoff', '2026-01-05 08:27:00+00:00'::timestamptz, '2026-01-05 08:29:00+00:00'::timestamptz, '2026-01-05 08:30:30+00:00'::timestamptz),
+        (journaling_object_ids[25], flight_ids[297], 'landing', '2026-01-05 08:51:00+00:00'::timestamptz, '2026-01-05 08:54:30+00:00'::timestamptz, '2026-01-05 08:55:45+00:00'::timestamptz),
+        (journaling_object_ids[26], flight_ids[298], 'takeoff', '2026-01-06 08:40:00+00:00'::timestamptz, '2026-01-06 08:42:00+00:00'::timestamptz, '2026-01-06 08:44:30+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[298], 'landing', '2026-01-06 09:18:00+00:00'::timestamptz, '2026-01-06 09:21:30+00:00'::timestamptz, '2026-01-06 09:23:00+00:00'::timestamptz),
+        (journaling_object_ids[51], flight_ids[299], 'takeoff', '2026-01-07 08:31:00+00:00'::timestamptz, '2026-01-07 08:33:00+00:00'::timestamptz, '2026-01-07 08:36:30+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[299], 'landing', '2026-01-07 09:08:00+00:00'::timestamptz, '2026-01-07 09:11:30+00:00'::timestamptz, '2026-01-07 09:13:15+00:00'::timestamptz),
+        (journaling_object_ids[41], flight_ids[300], 'takeoff', '2026-01-12 11:40:00+00:00'::timestamptz, '2026-01-12 11:59:00+00:00'::timestamptz, NULL);
+
+    INSERT INTO aircraft_inspection (airplane_id, mechanic_id, started_at, finished_at, result) VALUES
+        (journaling_object_ids[52], journaling_object_ids[19], '2026-01-01 07:03:00+00:00'::timestamptz, '2026-01-01 07:14:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[9], '2026-01-02 06:47:00+00:00'::timestamptz, '2026-01-02 06:59:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[34], '2026-01-03 06:57:00+00:00'::timestamptz, '2026-01-03 07:10:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[29], '2026-01-04 06:55:00+00:00'::timestamptz, '2026-01-04 07:09:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[24], '2026-01-05 06:57:00+00:00'::timestamptz, '2026-01-05 07:12:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[14], '2026-01-06 06:40:00+00:00'::timestamptz, '2026-01-06 06:56:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[9], '2026-01-07 07:12:00+00:00'::timestamptz, '2026-01-07 07:29:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[34], '2026-01-08 07:06:00+00:00'::timestamptz, '2026-01-08 07:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[52], journaling_object_ids[9], '2026-01-12 10:37:00+00:00'::timestamptz, '2026-01-12 10:56:00+00:00'::timestamptz, 'critical_defect'),
+        (journaling_object_ids[54], journaling_object_ids[44], '2026-01-01 06:54:00+00:00'::timestamptz, '2026-01-01 07:14:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[54], journaling_object_ids[39], '2026-01-02 06:59:00+00:00'::timestamptz, '2026-01-02 07:20:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[54], journaling_object_ids[9], '2026-01-03 07:20:00+00:00'::timestamptz, '2026-01-03 07:42:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[54], journaling_object_ids[34], '2026-01-04 07:00:00+00:00'::timestamptz, '2026-01-04 07:23:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[54], journaling_object_ids[14], '2026-01-05 06:54:00+00:00'::timestamptz, '2026-01-05 07:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[54], journaling_object_ids[9], '2026-01-06 06:59:00+00:00'::timestamptz, '2026-01-06 07:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[54], journaling_object_ids[29], '2026-01-07 06:45:00+00:00'::timestamptz, '2026-01-07 07:11:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[54], journaling_object_ids[9], '2026-01-08 06:53:00+00:00'::timestamptz, '2026-01-08 07:20:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[34], '2026-01-01 07:11:00+00:00'::timestamptz, '2026-01-01 07:40:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[9], '2026-01-02 07:08:00+00:00'::timestamptz, '2026-01-02 07:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[24], '2026-01-03 06:51:00+00:00'::timestamptz, '2026-01-03 07:02:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[34], '2026-01-04 07:06:00+00:00'::timestamptz, '2026-01-04 07:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[24], '2026-01-05 07:23:00+00:00'::timestamptz, '2026-01-05 07:36:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[34], '2026-01-06 07:11:00+00:00'::timestamptz, '2026-01-06 07:25:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[9], '2026-01-07 07:16:00+00:00'::timestamptz, '2026-01-07 07:31:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[56], journaling_object_ids[24], '2026-01-08 07:09:00+00:00'::timestamptz, '2026-01-08 07:25:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[34], '2026-01-01 07:33:00+00:00'::timestamptz, '2026-01-01 07:51:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[24], '2026-01-02 07:25:00+00:00'::timestamptz, '2026-01-02 07:44:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[39], '2026-01-03 07:10:00+00:00'::timestamptz, '2026-01-03 07:30:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[34], '2026-01-04 07:19:00+00:00'::timestamptz, '2026-01-04 07:40:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[24], '2026-01-05 07:22:00+00:00'::timestamptz, '2026-01-05 07:44:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[19], '2026-01-06 07:40:00+00:00'::timestamptz, '2026-01-06 08:03:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[29], '2026-01-07 07:25:00+00:00'::timestamptz, '2026-01-07 07:49:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[58], journaling_object_ids[44], '2026-01-08 07:32:00+00:00'::timestamptz, '2026-01-08 07:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[9], '2026-01-01 07:31:00+00:00'::timestamptz, '2026-01-01 07:58:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[39], '2026-01-02 07:26:00+00:00'::timestamptz, '2026-01-02 07:54:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[49], '2026-01-03 07:25:00+00:00'::timestamptz, '2026-01-03 07:54:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[19], '2026-01-04 07:22:00+00:00'::timestamptz, '2026-01-04 07:32:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[34], '2026-01-05 07:24:00+00:00'::timestamptz, '2026-01-05 07:35:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[39], '2026-01-06 07:21:00+00:00'::timestamptz, '2026-01-06 07:33:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[14], '2026-01-07 07:34:00+00:00'::timestamptz, '2026-01-07 07:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[9], '2026-01-08 07:32:00+00:00'::timestamptz, '2026-01-08 07:46:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[60], journaling_object_ids[29], '2026-01-12 10:52:00+00:00'::timestamptz, NULL, NULL),
+        (journaling_object_ids[62], journaling_object_ids[44], '2026-01-01 07:56:00+00:00'::timestamptz, '2026-01-01 08:12:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[62], journaling_object_ids[34], '2026-01-02 07:35:00+00:00'::timestamptz, '2026-01-02 07:52:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[62], journaling_object_ids[9], '2026-01-03 07:32:00+00:00'::timestamptz, '2026-01-03 07:50:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[62], journaling_object_ids[19], '2026-01-04 07:44:00+00:00'::timestamptz, '2026-01-04 08:03:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[62], journaling_object_ids[44], '2026-01-05 07:54:00+00:00'::timestamptz, '2026-01-05 08:14:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[62], journaling_object_ids[49], '2026-01-06 07:29:00+00:00'::timestamptz, '2026-01-06 07:50:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[62], journaling_object_ids[9], '2026-01-07 07:48:00+00:00'::timestamptz, '2026-01-07 08:10:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[62], journaling_object_ids[39], '2026-01-08 07:43:00+00:00'::timestamptz, '2026-01-08 08:06:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[34], '2026-01-01 07:55:00+00:00'::timestamptz, '2026-01-01 08:20:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[14], '2026-01-02 07:50:00+00:00'::timestamptz, '2026-01-02 08:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[19], '2026-01-03 07:41:00+00:00'::timestamptz, '2026-01-03 08:08:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[39], '2026-01-04 08:01:00+00:00'::timestamptz, '2026-01-04 08:29:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[9], '2026-01-05 07:55:00+00:00'::timestamptz, '2026-01-05 08:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[24], '2026-01-06 07:52:00+00:00'::timestamptz, '2026-01-06 08:02:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[9], '2026-01-07 07:52:00+00:00'::timestamptz, '2026-01-07 08:03:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[64], journaling_object_ids[24], '2026-01-08 07:48:00+00:00'::timestamptz, '2026-01-08 08:00:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[19], '2026-01-01 07:58:00+00:00'::timestamptz, '2026-01-01 08:12:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[49], '2026-01-02 07:51:00+00:00'::timestamptz, '2026-01-02 08:06:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[19], '2026-01-03 07:54:00+00:00'::timestamptz, '2026-01-03 08:10:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[29], '2026-01-04 08:05:00+00:00'::timestamptz, '2026-01-04 08:22:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[49], '2026-01-05 08:06:00+00:00'::timestamptz, '2026-01-05 08:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[9], '2026-01-06 08:11:00+00:00'::timestamptz, '2026-01-06 08:30:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[44], '2026-01-07 08:09:00+00:00'::timestamptz, '2026-01-07 08:29:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[66], journaling_object_ids[19], '2026-01-08 07:52:00+00:00'::timestamptz, '2026-01-08 08:13:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[29], '2026-01-01 08:09:00+00:00'::timestamptz, '2026-01-01 08:32:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[9], '2026-01-02 07:55:00+00:00'::timestamptz, '2026-01-02 08:19:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[44], '2026-01-03 07:59:00+00:00'::timestamptz, '2026-01-03 08:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[14], '2026-01-04 08:05:00+00:00'::timestamptz, '2026-01-04 08:31:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[24], '2026-01-05 08:26:00+00:00'::timestamptz, '2026-01-05 08:53:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[19], '2026-01-06 08:04:00+00:00'::timestamptz, '2026-01-06 08:32:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[24], '2026-01-07 08:30:00+00:00'::timestamptz, '2026-01-07 08:59:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[68], journaling_object_ids[9], '2026-01-08 08:25:00+00:00'::timestamptz, '2026-01-08 08:35:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[24], '2026-01-01 08:29:00+00:00'::timestamptz, '2026-01-01 08:41:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[39], '2026-01-02 08:34:00+00:00'::timestamptz, '2026-01-02 08:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[34], '2026-01-03 08:15:00+00:00'::timestamptz, '2026-01-03 08:29:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[19], '2026-01-04 08:31:00+00:00'::timestamptz, '2026-01-04 08:46:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[34], '2026-01-05 08:19:00+00:00'::timestamptz, '2026-01-05 08:35:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[39], '2026-01-06 08:14:00+00:00'::timestamptz, '2026-01-06 08:31:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[9], '2026-01-07 08:07:00+00:00'::timestamptz, '2026-01-07 08:25:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[70], journaling_object_ids[24], '2026-01-08 08:24:00+00:00'::timestamptz, '2026-01-08 08:43:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[9], '2026-01-01 08:13:00+00:00'::timestamptz, '2026-01-01 08:34:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[14], '2026-01-02 08:20:00+00:00'::timestamptz, '2026-01-02 08:42:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[29], '2026-01-03 08:45:00+00:00'::timestamptz, '2026-01-03 09:08:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[14], '2026-01-04 08:14:00+00:00'::timestamptz, '2026-01-04 08:38:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[9], '2026-01-05 08:33:00+00:00'::timestamptz, '2026-01-05 08:58:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[39], '2026-01-06 08:35:00+00:00'::timestamptz, '2026-01-06 09:01:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[29], '2026-01-07 08:25:00+00:00'::timestamptz, '2026-01-07 08:52:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[72], journaling_object_ids[44], '2026-01-08 08:31:00+00:00'::timestamptz, '2026-01-08 08:59:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[44], '2026-01-01 08:47:00+00:00'::timestamptz, '2026-01-01 08:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[34], '2026-01-02 08:31:00+00:00'::timestamptz, '2026-01-02 08:42:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[44], '2026-01-03 08:49:00+00:00'::timestamptz, '2026-01-03 09:01:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[9], '2026-01-04 08:46:00+00:00'::timestamptz, '2026-01-04 08:59:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[49], '2026-01-05 08:36:00+00:00'::timestamptz, '2026-01-05 08:50:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[24], '2026-01-06 08:50:00+00:00'::timestamptz, '2026-01-06 09:05:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[14], '2026-01-07 08:43:00+00:00'::timestamptz, '2026-01-07 08:59:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[74], journaling_object_ids[39], '2026-01-08 08:45:00+00:00'::timestamptz, '2026-01-08 09:02:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[29], '2026-01-01 08:37:00+00:00'::timestamptz, '2026-01-01 08:56:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[24], '2026-01-02 08:41:00+00:00'::timestamptz, '2026-01-02 09:01:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[19], '2026-01-03 08:54:00+00:00'::timestamptz, '2026-01-03 09:15:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[29], '2026-01-04 08:49:00+00:00'::timestamptz, '2026-01-04 09:11:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[9], '2026-01-05 08:54:00+00:00'::timestamptz, '2026-01-05 09:17:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[39], '2026-01-06 08:52:00+00:00'::timestamptz, '2026-01-06 09:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[19], '2026-01-07 08:44:00+00:00'::timestamptz, '2026-01-07 09:09:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[76], journaling_object_ids[49], '2026-01-12 10:47:00+00:00'::timestamptz, '2026-01-12 11:13:00+00:00'::timestamptz, 'critical_defect'),
+        (journaling_object_ids[78], journaling_object_ids[9], '2026-01-01 09:12:00+00:00'::timestamptz, '2026-01-01 09:39:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[78], journaling_object_ids[49], '2026-01-02 09:09:00+00:00'::timestamptz, '2026-01-02 09:37:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[78], journaling_object_ids[9], '2026-01-03 08:59:00+00:00'::timestamptz, '2026-01-03 09:28:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[78], journaling_object_ids[29], '2026-01-04 09:16:00+00:00'::timestamptz, '2026-01-04 09:26:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[78], journaling_object_ids[19], '2026-01-05 08:59:00+00:00'::timestamptz, '2026-01-05 09:10:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[78], journaling_object_ids[14], '2026-01-06 09:11:00+00:00'::timestamptz, '2026-01-06 09:23:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[78], journaling_object_ids[29], '2026-01-07 09:03:00+00:00'::timestamptz, '2026-01-07 09:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[80], journaling_object_ids[9], '2026-01-01 09:17:00+00:00'::timestamptz, '2026-01-01 09:32:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[80], journaling_object_ids[49], '2026-01-02 09:12:00+00:00'::timestamptz, '2026-01-02 09:28:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[80], journaling_object_ids[9], '2026-01-03 08:57:00+00:00'::timestamptz, '2026-01-03 09:14:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[80], journaling_object_ids[29], '2026-01-04 09:33:00+00:00'::timestamptz, '2026-01-04 09:51:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[80], journaling_object_ids[9], '2026-01-05 09:15:00+00:00'::timestamptz, '2026-01-05 09:34:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[80], journaling_object_ids[34], '2026-01-06 09:15:00+00:00'::timestamptz, '2026-01-06 09:35:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[80], journaling_object_ids[24], '2026-01-07 09:17:00+00:00'::timestamptz, '2026-01-07 09:38:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[82], journaling_object_ids[34], '2026-01-01 09:32:00+00:00'::timestamptz, '2026-01-01 09:55:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[82], journaling_object_ids[44], '2026-01-02 09:08:00+00:00'::timestamptz, '2026-01-02 09:32:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[82], journaling_object_ids[14], '2026-01-03 09:30:00+00:00'::timestamptz, '2026-01-03 09:55:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[82], journaling_object_ids[24], '2026-01-04 09:07:00+00:00'::timestamptz, '2026-01-04 09:33:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[82], journaling_object_ids[39], '2026-01-05 09:17:00+00:00'::timestamptz, '2026-01-05 09:44:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[82], journaling_object_ids[34], '2026-01-06 09:25:00+00:00'::timestamptz, '2026-01-06 09:53:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[82], journaling_object_ids[9], '2026-01-07 09:12:00+00:00'::timestamptz, '2026-01-07 09:41:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[29], '2026-01-01 09:39:00+00:00'::timestamptz, '2026-01-01 09:50:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[24], '2026-01-02 09:35:00+00:00'::timestamptz, '2026-01-02 09:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[9], '2026-01-03 09:12:00+00:00'::timestamptz, '2026-01-03 09:25:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[39], '2026-01-04 09:17:00+00:00'::timestamptz, '2026-01-04 09:31:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[14], '2026-01-05 09:48:00+00:00'::timestamptz, '2026-01-05 10:03:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[19], '2026-01-06 09:12:00+00:00'::timestamptz, '2026-01-06 09:28:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[44], '2026-01-07 09:18:00+00:00'::timestamptz, '2026-01-07 09:35:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[84], journaling_object_ids[9], '2026-01-12 10:31:00+00:00'::timestamptz, NULL, NULL),
+        (journaling_object_ids[86], journaling_object_ids[19], '2026-01-01 09:38:00+00:00'::timestamptz, '2026-01-01 09:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[86], journaling_object_ids[9], '2026-01-02 09:37:00+00:00'::timestamptz, '2026-01-02 09:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[86], journaling_object_ids[49], '2026-01-03 09:42:00+00:00'::timestamptz, '2026-01-03 10:03:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[86], journaling_object_ids[19], '2026-01-04 09:39:00+00:00'::timestamptz, '2026-01-04 10:01:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[86], journaling_object_ids[9], '2026-01-05 09:27:00+00:00'::timestamptz, '2026-01-05 09:50:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[86], journaling_object_ids[29], '2026-01-06 10:00:00+00:00'::timestamptz, '2026-01-06 10:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[86], journaling_object_ids[14], '2026-01-07 09:39:00+00:00'::timestamptz, '2026-01-07 10:04:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[88], journaling_object_ids[14], '2026-01-01 09:35:00+00:00'::timestamptz, '2026-01-01 10:02:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[88], journaling_object_ids[29], '2026-01-02 09:47:00+00:00'::timestamptz, '2026-01-02 10:15:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[88], journaling_object_ids[14], '2026-01-03 09:58:00+00:00'::timestamptz, '2026-01-03 10:27:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[88], journaling_object_ids[9], '2026-01-04 09:37:00+00:00'::timestamptz, '2026-01-04 09:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[88], journaling_object_ids[24], '2026-01-05 09:54:00+00:00'::timestamptz, '2026-01-05 10:05:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[88], journaling_object_ids[19], '2026-01-06 10:02:00+00:00'::timestamptz, '2026-01-06 10:14:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[88], journaling_object_ids[14], '2026-01-07 10:06:00+00:00'::timestamptz, '2026-01-07 10:19:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[90], journaling_object_ids[29], '2026-01-01 10:06:00+00:00'::timestamptz, '2026-01-01 10:21:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[90], journaling_object_ids[24], '2026-01-02 10:03:00+00:00'::timestamptz, '2026-01-02 10:19:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[90], journaling_object_ids[14], '2026-01-03 09:50:00+00:00'::timestamptz, '2026-01-03 10:07:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[90], journaling_object_ids[34], '2026-01-04 09:39:00+00:00'::timestamptz, '2026-01-04 09:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[90], journaling_object_ids[24], '2026-01-05 09:56:00+00:00'::timestamptz, '2026-01-05 10:15:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[90], journaling_object_ids[34], '2026-01-06 10:04:00+00:00'::timestamptz, '2026-01-06 10:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[90], journaling_object_ids[19], '2026-01-07 10:12:00+00:00'::timestamptz, '2026-01-07 10:33:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[92], journaling_object_ids[14], '2026-01-01 06:55:00+00:00'::timestamptz, '2026-01-01 07:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[92], journaling_object_ids[44], '2026-01-02 06:52:00+00:00'::timestamptz, '2026-01-02 07:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[92], journaling_object_ids[9], '2026-01-03 06:55:00+00:00'::timestamptz, '2026-01-03 07:20:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[92], journaling_object_ids[19], '2026-01-04 06:40:00+00:00'::timestamptz, '2026-01-04 07:06:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[92], journaling_object_ids[44], '2026-01-05 07:07:00+00:00'::timestamptz, '2026-01-05 07:34:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[92], journaling_object_ids[19], '2026-01-06 06:30:00+00:00'::timestamptz, '2026-01-06 06:58:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[92], journaling_object_ids[9], '2026-01-07 07:00:00+00:00'::timestamptz, '2026-01-07 07:29:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[94], journaling_object_ids[34], '2026-01-01 06:56:00+00:00'::timestamptz, '2026-01-01 07:07:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[94], journaling_object_ids[14], '2026-01-02 07:04:00+00:00'::timestamptz, '2026-01-02 07:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[94], journaling_object_ids[9], '2026-01-03 07:08:00+00:00'::timestamptz, '2026-01-03 07:21:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[94], journaling_object_ids[34], '2026-01-04 07:09:00+00:00'::timestamptz, '2026-01-04 07:23:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[94], journaling_object_ids[9], '2026-01-05 06:49:00+00:00'::timestamptz, '2026-01-05 07:04:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[94], journaling_object_ids[39], '2026-01-06 06:44:00+00:00'::timestamptz, '2026-01-06 07:00:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[94], journaling_object_ids[19], '2026-01-07 06:57:00+00:00'::timestamptz, '2026-01-07 07:14:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[96], journaling_object_ids[9], '2026-01-01 07:16:00+00:00'::timestamptz, '2026-01-01 07:35:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[96], journaling_object_ids[39], '2026-01-02 07:22:00+00:00'::timestamptz, '2026-01-02 07:42:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[96], journaling_object_ids[9], '2026-01-03 07:16:00+00:00'::timestamptz, '2026-01-03 07:37:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[96], journaling_object_ids[49], '2026-01-04 07:04:00+00:00'::timestamptz, '2026-01-04 07:26:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[96], journaling_object_ids[34], '2026-01-05 07:22:00+00:00'::timestamptz, '2026-01-05 07:45:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[96], journaling_object_ids[9], '2026-01-06 07:19:00+00:00'::timestamptz, '2026-01-06 07:43:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[96], journaling_object_ids[44], '2026-01-07 06:57:00+00:00'::timestamptz, '2026-01-07 07:22:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[98], journaling_object_ids[29], '2026-01-01 07:04:00+00:00'::timestamptz, '2026-01-01 07:31:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[98], journaling_object_ids[9], '2026-01-02 07:36:00+00:00'::timestamptz, '2026-01-02 08:04:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[98], journaling_object_ids[34], '2026-01-03 07:25:00+00:00'::timestamptz, '2026-01-03 07:54:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[98], journaling_object_ids[29], '2026-01-04 07:19:00+00:00'::timestamptz, '2026-01-04 07:29:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[98], journaling_object_ids[39], '2026-01-05 07:12:00+00:00'::timestamptz, '2026-01-05 07:23:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[98], journaling_object_ids[44], '2026-01-06 07:35:00+00:00'::timestamptz, '2026-01-06 07:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[98], journaling_object_ids[19], '2026-01-07 07:13:00+00:00'::timestamptz, '2026-01-07 07:26:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[9], '2026-01-01 07:29:00+00:00'::timestamptz, '2026-01-01 07:44:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[39], '2026-01-02 07:38:00+00:00'::timestamptz, '2026-01-02 07:54:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[24], '2026-01-03 07:40:00+00:00'::timestamptz, '2026-01-03 07:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[14], '2026-01-04 07:15:00+00:00'::timestamptz, '2026-01-04 07:33:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[44], '2026-01-05 07:39:00+00:00'::timestamptz, '2026-01-05 07:58:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[29], '2026-01-06 07:22:00+00:00'::timestamptz, '2026-01-06 07:42:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[14], '2026-01-07 07:51:00+00:00'::timestamptz, '2026-01-07 08:12:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[100], journaling_object_ids[44], '2026-01-12 10:36:00+00:00'::timestamptz, '2026-01-12 10:58:00+00:00'::timestamptz, 'critical_defect'),
+        (journaling_object_ids[102], journaling_object_ids[9], '2026-01-01 07:53:00+00:00'::timestamptz, '2026-01-01 08:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[102], journaling_object_ids[49], '2026-01-02 07:54:00+00:00'::timestamptz, '2026-01-02 08:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[102], journaling_object_ids[9], '2026-01-03 07:39:00+00:00'::timestamptz, '2026-01-03 08:04:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[102], journaling_object_ids[39], '2026-01-04 07:22:00+00:00'::timestamptz, '2026-01-04 07:48:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[102], journaling_object_ids[34], '2026-01-05 07:37:00+00:00'::timestamptz, '2026-01-05 08:04:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[102], journaling_object_ids[9], '2026-01-06 07:41:00+00:00'::timestamptz, '2026-01-06 08:09:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[102], journaling_object_ids[29], '2026-01-07 07:29:00+00:00'::timestamptz, '2026-01-07 07:58:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[104], journaling_object_ids[29], '2026-01-01 07:55:00+00:00'::timestamptz, '2026-01-01 08:06:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[104], journaling_object_ids[9], '2026-01-02 07:48:00+00:00'::timestamptz, '2026-01-02 08:00:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[104], journaling_object_ids[29], '2026-01-03 07:58:00+00:00'::timestamptz, '2026-01-03 08:11:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[104], journaling_object_ids[9], '2026-01-04 07:47:00+00:00'::timestamptz, '2026-01-04 08:01:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[104], journaling_object_ids[19], '2026-01-05 07:39:00+00:00'::timestamptz, '2026-01-05 07:54:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[104], journaling_object_ids[49], '2026-01-06 07:49:00+00:00'::timestamptz, '2026-01-06 08:05:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[104], journaling_object_ids[24], '2026-01-07 08:08:00+00:00'::timestamptz, '2026-01-07 08:25:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[106], journaling_object_ids[19], '2026-01-01 07:50:00+00:00'::timestamptz, '2026-01-01 08:09:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[106], journaling_object_ids[34], '2026-01-02 08:01:00+00:00'::timestamptz, '2026-01-02 08:21:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[106], journaling_object_ids[49], '2026-01-03 07:55:00+00:00'::timestamptz, '2026-01-03 08:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[106], journaling_object_ids[19], '2026-01-04 08:18:00+00:00'::timestamptz, '2026-01-04 08:40:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[106], journaling_object_ids[14], '2026-01-05 08:13:00+00:00'::timestamptz, '2026-01-05 08:36:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[106], journaling_object_ids[39], '2026-01-06 07:45:00+00:00'::timestamptz, '2026-01-06 08:09:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[106], journaling_object_ids[44], '2026-01-07 08:01:00+00:00'::timestamptz, '2026-01-07 08:26:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[19], '2026-01-01 08:06:00+00:00'::timestamptz, '2026-01-01 08:33:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[9], '2026-01-02 08:06:00+00:00'::timestamptz, '2026-01-02 08:34:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[44], '2026-01-03 07:58:00+00:00'::timestamptz, '2026-01-03 08:27:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[39], '2026-01-04 08:05:00+00:00'::timestamptz, '2026-01-04 08:15:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[14], '2026-01-05 08:05:00+00:00'::timestamptz, '2026-01-05 08:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[9], '2026-01-06 08:07:00+00:00'::timestamptz, '2026-01-06 08:19:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[49], '2026-01-07 07:56:00+00:00'::timestamptz, '2026-01-07 08:09:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[108], journaling_object_ids[9], '2026-01-12 10:42:00+00:00'::timestamptz, NULL, NULL),
+        (journaling_object_ids[110], journaling_object_ids[9], '2026-01-01 08:34:00+00:00'::timestamptz, '2026-01-01 08:49:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[110], journaling_object_ids[14], '2026-01-02 08:43:00+00:00'::timestamptz, '2026-01-02 08:59:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[110], journaling_object_ids[49], '2026-01-03 08:26:00+00:00'::timestamptz, '2026-01-03 08:43:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[110], journaling_object_ids[24], '2026-01-04 08:40:00+00:00'::timestamptz, '2026-01-04 08:58:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[110], journaling_object_ids[34], '2026-01-05 08:21:00+00:00'::timestamptz, '2026-01-05 08:40:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[110], journaling_object_ids[39], '2026-01-06 08:22:00+00:00'::timestamptz, '2026-01-06 08:42:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[110], journaling_object_ids[9], '2026-01-07 08:29:00+00:00'::timestamptz, '2026-01-07 08:50:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[112], journaling_object_ids[39], '2026-01-01 08:34:00+00:00'::timestamptz, '2026-01-01 08:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[112], journaling_object_ids[9], '2026-01-02 08:38:00+00:00'::timestamptz, '2026-01-02 09:02:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[112], journaling_object_ids[14], '2026-01-03 08:32:00+00:00'::timestamptz, '2026-01-03 08:57:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[112], journaling_object_ids[49], '2026-01-04 08:30:00+00:00'::timestamptz, '2026-01-04 08:56:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[112], journaling_object_ids[9], '2026-01-05 08:41:00+00:00'::timestamptz, '2026-01-05 09:08:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[112], journaling_object_ids[14], '2026-01-06 08:45:00+00:00'::timestamptz, '2026-01-06 09:13:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[112], journaling_object_ids[9], '2026-01-07 08:25:00+00:00'::timestamptz, '2026-01-07 08:54:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[114], journaling_object_ids[14], '2026-01-01 08:34:00+00:00'::timestamptz, '2026-01-01 08:45:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[114], journaling_object_ids[34], '2026-01-02 09:02:00+00:00'::timestamptz, '2026-01-02 09:14:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[114], journaling_object_ids[14], '2026-01-03 08:46:00+00:00'::timestamptz, '2026-01-03 08:59:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[114], journaling_object_ids[49], '2026-01-04 08:33:00+00:00'::timestamptz, '2026-01-04 08:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[114], journaling_object_ids[14], '2026-01-05 08:48:00+00:00'::timestamptz, '2026-01-05 09:03:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[114], journaling_object_ids[29], '2026-01-06 08:50:00+00:00'::timestamptz, '2026-01-06 09:06:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[114], journaling_object_ids[44], '2026-01-07 08:29:00+00:00'::timestamptz, '2026-01-07 08:46:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[116], journaling_object_ids[9], '2026-01-01 08:59:00+00:00'::timestamptz, '2026-01-01 09:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[116], journaling_object_ids[19], '2026-01-02 08:40:00+00:00'::timestamptz, '2026-01-02 09:00:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[116], journaling_object_ids[49], '2026-01-03 08:43:00+00:00'::timestamptz, '2026-01-03 09:04:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[116], journaling_object_ids[9], '2026-01-04 08:43:00+00:00'::timestamptz, '2026-01-04 09:05:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[116], journaling_object_ids[44], '2026-01-05 08:47:00+00:00'::timestamptz, '2026-01-05 09:10:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[116], journaling_object_ids[9], '2026-01-06 08:48:00+00:00'::timestamptz, '2026-01-06 09:12:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[116], journaling_object_ids[19], '2026-01-07 08:50:00+00:00'::timestamptz, '2026-01-07 09:15:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[118], journaling_object_ids[49], '2026-01-01 09:20:00+00:00'::timestamptz, '2026-01-01 09:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[118], journaling_object_ids[19], '2026-01-02 08:50:00+00:00'::timestamptz, '2026-01-02 09:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[118], journaling_object_ids[14], '2026-01-03 08:55:00+00:00'::timestamptz, '2026-01-03 09:24:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[118], journaling_object_ids[9], '2026-01-04 09:13:00+00:00'::timestamptz, '2026-01-04 09:23:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[118], journaling_object_ids[39], '2026-01-05 09:07:00+00:00'::timestamptz, '2026-01-05 09:18:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[118], journaling_object_ids[34], '2026-01-06 09:00:00+00:00'::timestamptz, '2026-01-06 09:12:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[118], journaling_object_ids[24], '2026-01-07 09:08:00+00:00'::timestamptz, '2026-01-07 09:21:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[120], journaling_object_ids[24], '2026-01-01 09:27:00+00:00'::timestamptz, '2026-01-01 09:42:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[120], journaling_object_ids[44], '2026-01-02 09:10:00+00:00'::timestamptz, '2026-01-02 09:26:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[120], journaling_object_ids[39], '2026-01-03 09:24:00+00:00'::timestamptz, '2026-01-03 09:41:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[120], journaling_object_ids[9], '2026-01-04 08:58:00+00:00'::timestamptz, '2026-01-04 09:16:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[120], journaling_object_ids[14], '2026-01-05 09:12:00+00:00'::timestamptz, '2026-01-05 09:31:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[120], journaling_object_ids[44], '2026-01-06 09:20:00+00:00'::timestamptz, '2026-01-06 09:40:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[120], journaling_object_ids[34], '2026-01-07 09:18:00+00:00'::timestamptz, '2026-01-07 09:39:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[122], journaling_object_ids[9], '2026-01-01 09:24:00+00:00'::timestamptz, '2026-01-01 09:47:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[122], journaling_object_ids[29], '2026-01-02 09:39:00+00:00'::timestamptz, '2026-01-02 10:03:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[122], journaling_object_ids[24], '2026-01-03 09:24:00+00:00'::timestamptz, '2026-01-03 09:49:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[122], journaling_object_ids[9], '2026-01-04 09:29:00+00:00'::timestamptz, '2026-01-04 09:55:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[122], journaling_object_ids[24], '2026-01-05 09:00:00+00:00'::timestamptz, '2026-01-05 09:27:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[122], journaling_object_ids[49], '2026-01-06 09:27:00+00:00'::timestamptz, '2026-01-06 09:55:00+00:00'::timestamptz, 'serviceable'),
+        (journaling_object_ids[122], journaling_object_ids[39], '2026-01-07 09:17:00+00:00'::timestamptz, '2026-01-07 09:46:00+00:00'::timestamptz, 'serviceable');
 END $load$;
 
 COMMIT;

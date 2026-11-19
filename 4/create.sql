@@ -20,6 +20,8 @@ CREATE TABLE airport (
 CREATE TABLE airplane (
     airplane_id bigint NOT NULL PRIMARY KEY,
     airport_id bigint NOT NULL,
+    base_airport_id bigint NOT NULL REFERENCES airport(airport_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    aircraft_type text NOT NULL CHECK (btrim(aircraft_type) <> ''),
     hangar_number smallint,
     status_id bigint NOT NULL,
     width numeric(10,2) NOT NULL,
@@ -65,6 +67,7 @@ CREATE TABLE flight (
     airplane_id bigint NOT NULL,
     employee_id bigint NOT NULL,
     takeoff_line_id bigint NOT NULL,
+    destination_airport_id bigint NOT NULL REFERENCES airport(airport_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     planned_takeoff_time timestamptz NOT NULL,
     actual_takeoff_time timestamptz,
     planned_land_time timestamptz NOT NULL,
@@ -306,5 +309,28 @@ ALTER TABLE airplane_master
     ADD CONSTRAINT fk_master_employee FOREIGN KEY (employee_id)
     REFERENCES employee(employee_id)
     ON DELETE RESTRICT ON UPDATE CASCADE;
+
+CREATE TABLE runway_usage (
+    usage_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    line_id bigint NOT NULL REFERENCES line(line_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    flight_id bigint NOT NULL REFERENCES flight(flight_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    operation_type text NOT NULL CHECK (operation_type IN ('takeoff', 'landing')),
+    assigned_at timestamptz NOT NULL,
+    occupied_at timestamptz,
+    released_at timestamptz,
+    CHECK (occupied_at >= assigned_at),
+    CHECK (released_at IS NULL OR (occupied_at IS NOT NULL AND released_at > occupied_at))
+);
+
+CREATE TABLE aircraft_inspection (
+    inspection_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    airplane_id bigint NOT NULL REFERENCES airplane(airplane_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    mechanic_id bigint NOT NULL REFERENCES employee(employee_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    started_at timestamptz NOT NULL,
+    finished_at timestamptz,
+    result text CHECK (result IN ('serviceable', 'critical_defect')),
+    CHECK ((finished_at IS NULL) = (result IS NULL)),
+    CHECK (finished_at > started_at)
+);
 
 COMMIT;

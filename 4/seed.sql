@@ -9,7 +9,7 @@ DECLARE
     flight_ids bigint[];
     passenger_ids bigint[];
 BEGIN
-    LOCK TABLE airport, employee_position, hangar, journaling_object, journal, flight_status, airplane, employee, line, flight, passenger, boarding_pass, landing, airplane_master, plane_positions IN EXCLUSIVE MODE;
+    LOCK TABLE airport, employee_position, hangar, journaling_object, journal, flight_status, airplane, employee, line, flight, passenger, boarding_pass, landing, airplane_master, plane_positions, runway_usage, aircraft_inspection IN EXCLUSIVE MODE;
     IF EXISTS (SELECT 1 FROM airport) THEN
         RAISE EXCEPTION 'Table must be empty: airport';
     END IF;
@@ -51,6 +51,12 @@ BEGIN
     END IF;
     IF EXISTS (SELECT 1 FROM airplane_master) THEN
         RAISE EXCEPTION 'Table must be empty: airplane_master';
+    END IF;
+    IF EXISTS (SELECT 1 FROM runway_usage) THEN
+        RAISE EXCEPTION 'Table must be empty: runway_usage';
+    END IF;
+    IF EXISTS (SELECT 1 FROM aircraft_inspection) THEN
+        RAISE EXCEPTION 'Table must be empty: aircraft_inspection';
     END IF;
     IF EXISTS (SELECT 1 FROM plane_positions) THEN
         RAISE EXCEPTION 'Table must be empty: plane_positions';
@@ -257,13 +263,13 @@ BEGIN
         (journaling_object_ids[5], 'checking'),
         (journaling_object_ids[6], 'waiting checking');
 
-    INSERT INTO airplane (airplane_id, airport_id, hangar_number, status_id, width, length, height) VALUES
-        (journaling_object_ids[7], airport_ids[1], NULL, journaling_object_ids[1], 20, 25, 8),
-        (journaling_object_ids[8], airport_ids[1], NULL, journaling_object_ids[2], 22, 28, 9),
-        (journaling_object_ids[9], airport_ids[1], NULL, journaling_object_ids[3], 20, 25, 8),
-        (journaling_object_ids[10], airport_ids[2], 1, journaling_object_ids[4], 22, 28, 9),
-        (journaling_object_ids[11], airport_ids[2], 2, journaling_object_ids[5], 20, 25, 8),
-        (journaling_object_ids[12], airport_ids[2], 1, journaling_object_ids[6], 22, 28, 9);
+    INSERT INTO airplane (airplane_id, airport_id, hangar_number, status_id, width, length, height, base_airport_id, aircraft_type) VALUES
+        (journaling_object_ids[7], airport_ids[1], NULL, journaling_object_ids[1], 20, 25, 8, airport_ids[1], 'Turboprop'),
+        (journaling_object_ids[8], airport_ids[1], NULL, journaling_object_ids[2], 22, 28, 9, airport_ids[1], 'Regional jet'),
+        (journaling_object_ids[9], airport_ids[1], NULL, journaling_object_ids[3], 20, 25, 8, airport_ids[1], 'Turboprop'),
+        (journaling_object_ids[10], airport_ids[2], 1, journaling_object_ids[4], 22, 28, 9, airport_ids[2], 'Regional jet'),
+        (journaling_object_ids[11], airport_ids[2], 2, journaling_object_ids[5], 20, 25, 8, airport_ids[2], 'Turboprop'),
+        (journaling_object_ids[12], airport_ids[2], 1, journaling_object_ids[6], 22, 28, 9, airport_ids[2], 'Regional jet');
 
     INSERT INTO employee (employee_id, position_id, firstname, lastname, middle_name, birthdate, working_place, contract_information) VALUES
         (journaling_object_ids[13], employee_position_ids[1], 'Ivan', 'Testov', NULL, '1990-02-10', 'North Airport', 'DEMO-P01'),
@@ -275,26 +281,26 @@ BEGIN
 
     INSERT INTO line (line_id, airport_id, is_free, latitude, longitude, altitude, width, length, direction) VALUES
         (journaling_object_ids[19], airport_ids[1], true, 55, 37, 150, 40, 2000, 90),
-        (journaling_object_ids[20], airport_ids[1], true, 55.001, 37.001, 150, 40, 2200, 270),
+        (journaling_object_ids[20], airport_ids[1], false, 55.001, 37.001, 150, 40, 2200, 270),
         (journaling_object_ids[21], airport_ids[2], true, 56, 38, 180, 40, 2000, 90),
         (journaling_object_ids[22], airport_ids[2], true, 56.001, 38.001, 180, 40, 2200, 270),
         (journaling_object_ids[23], airport_ids[3], true, 54, 36, 120, 40, 2000, 90),
         (journaling_object_ids[24], airport_ids[3], true, 54.001, 36.001, 120, 40, 2200, 270);
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[12], journaling_object_ids[14], journaling_object_ids[19], '2026-11-04 09:00:00+00', '2026-11-04 09:05:00+00', '2026-11-04 10:00:00+00', '2026-11-04 10:03:00+00');
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[12], journaling_object_ids[14], journaling_object_ids[19], '2026-11-04 09:00:00+00', '2026-11-04 09:05:00+00', '2026-11-04 10:00:00+00', '2026-11-04 10:03:00+00', airport_ids[2]);
     flight_ids[1] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[7], journaling_object_ids[13], journaling_object_ids[19], '2026-11-04 11:30:00+00', '2026-11-04 11:35:00+00', '2026-11-04 12:30:00+00', NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[7], journaling_object_ids[13], journaling_object_ids[19], '2026-11-04 11:30:00+00', '2026-11-04 11:35:00+00', '2026-11-04 12:30:00+00', NULL, airport_ids[2]);
     flight_ids[2] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[8], journaling_object_ids[13], journaling_object_ids[20], '2026-11-04 14:00:00+00', NULL, '2026-11-04 15:00:00+00', NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[8], journaling_object_ids[13], journaling_object_ids[20], '2026-11-04 14:00:00+00', NULL, '2026-11-04 15:00:00+00', NULL, airport_ids[2]);
     flight_ids[3] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
-    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time) VALUES
-        (journaling_object_ids[9], journaling_object_ids[14], journaling_object_ids[21], '2026-11-04 11:00:00+00', '2026-11-04 11:02:00+00', '2026-11-04 12:05:00+00', NULL);
+    INSERT INTO flight (airplane_id, employee_id, takeoff_line_id, planned_takeoff_time, actual_takeoff_time, planned_land_time, actual_land_time, destination_airport_id) VALUES
+        (journaling_object_ids[9], journaling_object_ids[14], journaling_object_ids[21], '2026-11-04 11:00:00+00', '2026-11-04 11:02:00+00', '2026-11-04 12:05:00+00', NULL, airport_ids[1]);
     flight_ids[4] := currval(pg_get_serial_sequence('flight', 'flight_id'));
 
     INSERT INTO passenger (firstname, lastname, middle_name, birthdate, passport_data, country) VALUES
@@ -346,6 +352,17 @@ BEGIN
         (journaling_object_ids[11], 56, 38, 180, 0, 0, 0, '2026-11-04 12:00:00+00'),
         (journaling_object_ids[12], 56, 38, 180, 0, 0, 0, '2026-11-04 10:03:00+00'),
         (journaling_object_ids[12], 56, 38, 180, 0, 0, 0, '2026-11-04 12:00:00+00');
+    INSERT INTO runway_usage (line_id, flight_id, operation_type, assigned_at, occupied_at, released_at) VALUES
+        (journaling_object_ids[19], flight_ids[1], 'takeoff', '2026-11-04 09:00:00+00', '2026-11-04 09:03:00+00', '2026-11-04 09:06:00+00'),
+        (journaling_object_ids[21], flight_ids[1], 'landing', '2026-11-04 09:58:00+00', '2026-11-04 10:02:00+00', '2026-11-04 10:04:00+00'),
+        (journaling_object_ids[19], flight_ids[2], 'takeoff', '2026-11-04 11:30:00+00', '2026-11-04 11:33:00+00', '2026-11-04 11:36:00+00'),
+        (journaling_object_ids[20], flight_ids[3], 'takeoff', '2026-11-04 11:40:00+00', '2026-11-04 11:50:00+00', NULL),
+        (journaling_object_ids[21], flight_ids[4], 'takeoff', '2026-11-04 10:57:00+00', '2026-11-04 11:00:00+00', '2026-11-04 11:03:00+00');
+
+    INSERT INTO aircraft_inspection (airplane_id, mechanic_id, started_at, finished_at, result) VALUES
+        (journaling_object_ids[8], journaling_object_ids[17], '2026-11-04 09:00:00+00', '2026-11-04 09:20:00+00', 'serviceable'),
+        (journaling_object_ids[10], journaling_object_ids[18], '2026-11-04 09:00:00+00', '2026-11-04 09:30:00+00', 'critical_defect'),
+        (journaling_object_ids[11], journaling_object_ids[18], '2026-11-04 11:50:00+00', NULL, NULL);
 END $load$;
 
 COMMIT;

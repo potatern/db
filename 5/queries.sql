@@ -35,8 +35,8 @@ last_departures AS (
     GROUP BY airplane_id
 )
 SELECT p.airplane_id,
-    NULL::text AS airplane_type,
-    NULL::text AS base_airport,
+    p.aircraft_type AS airplane_type,
+    base.name AS base_airport,
     a.name AS recorded_airport,
     COALESCE(c.completed_count, 0) AS completed_count,
     COALESCE(c.total_flight_time, INTERVAL '0 seconds') AS total_flight_time,
@@ -45,21 +45,27 @@ SELECT p.airplane_id,
     s.status AS current_status
 FROM airplane AS p
 JOIN airport AS a ON a.airport_id = p.airport_id
+JOIN airport AS base ON base.airport_id = p.base_airport_id
 JOIN flight_status AS s ON s.status_id = p.status_id
 LEFT JOIN completed_flights AS c ON c.airplane_id = p.airplane_id
 LEFT JOIN last_departures AS d ON d.airplane_id = p.airplane_id
 ORDER BY p.airplane_id;
 
-WITH report_period AS (
-    SELECT TIMESTAMPTZ '2026-01-01 00:00:00+00' AS starts_at,
-        TIMESTAMPTZ '2026-02-01 00:00:00+00' AS ends_at,
-        CURRENT_TIMESTAMP AS as_of
+WITH report_snapshot AS (
+    SELECT COALESCE(MAX(time_utc), CURRENT_TIMESTAMP) AS as_of
+    FROM plane_positions
+),
+report_period AS (
+    SELECT DATE_TRUNC('month', as_of AT TIME ZONE 'UTC') AT TIME ZONE 'UTC' AS starts_at,
+        (DATE_TRUNC('month', as_of AT TIME ZONE 'UTC') + INTERVAL '1 month') AT TIME ZONE 'UTC' AS ends_at,
+        as_of
+    FROM report_snapshot
 ),
 period_employees AS (
     SELECT DISTINCT m.employee_id
     FROM airplane_master AS m
     CROSS JOIN report_period AS r
-    WHERE m.started_at >= r.starts_at AND m.started_at < r.ends_at
+    WHERE m.started_at >= r.starts_at AND m.started_at < r.ends_at AND m.started_at <= r.as_of
 ),
 unassigned_dispatchers AS (
     SELECT e.employee_id
@@ -77,11 +83,11 @@ dispatcher_stats AS (
                 AND (m.ended_at IS NULL OR m.ended_at > r.as_of)
         ) AS active_airplanes,
         COUNT(m.assignment_id) FILTER (
-            WHERE m.started_at >= r.starts_at AND m.started_at < r.ends_at
+            WHERE m.started_at >= r.starts_at AND m.started_at < r.ends_at AND m.started_at <= r.as_of
         ) AS assignments_in_period,
         AVG(m.ended_at - m.started_at) FILTER (
             WHERE m.started_at >= r.starts_at
-                AND m.started_at < r.ends_at
+                AND m.started_at < r.ends_at AND m.started_at <= r.as_of
                 AND m.ended_at <= r.as_of
         ) AS avg_tracking_time,
         MAX(m.started_at) FILTER (WHERE m.started_at <= r.as_of) AS last_assignment_at
@@ -107,42 +113,66 @@ ORDER BY airport, active_airplanes DESC, d.employee_id;
 
 WITH runway_events AS (
     SELECT takeoff_line_id AS line_id, actual_takeoff_time AS happened_at,
-           'takeoff' AS event_type, flight_id AS event_id
+           'takeoff' AS event_type
     FROM flight
     WHERE actual_takeoff_time IS NOT NULL
     UNION ALL
-    SELECT line_id, landing_time, 'landing', landing_id
+    SELECT line_id, landing_time, 'landing'
     FROM landing
     WHERE line_id IS NOT NULL
 ),
-daily_activity AS (
-    SELECT line_id, happened_at, event_type,
-           COUNT(*) OVER (
-               PARTITION BY line_id, (happened_at AT TIME ZONE 'UTC')::date
-               ORDER BY happened_at, event_type, event_id
-               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-           ) AS operations_so_far_today
-    FROM runway_events
-),
 event_totals AS (
     SELECT line_id,
-           COUNT(*) FILTER (WHERE event_type = 'takeoff') AS takeoff_count,
-           COUNT(*) FILTER (WHERE event_type = 'landing') AS landing_count,
-           MAX(operations_so_far_today) AS peak_daily_operations,
-           MAX(happened_at) AS last_used_at
-    FROM daily_activity
+        COUNT(*) FILTER (WHERE event_type = 'takeoff') AS takeoff_count,
+        COUNT(*) FILTER (WHERE event_type = 'landing') AS landing_count,
+        MAX(happened_at) AS last_operation_at
+    FROM runway_events
+    GROUP BY line_id
+),
+ordered_usage AS (
+    SELECT usage_id, line_id, occupied_at, released_at,
+        MAX(released_at) OVER (
+            PARTITION BY line_id ORDER BY occupied_at, usage_id
+            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+        ) AS previous_end
+    FROM runway_usage
+    WHERE released_at IS NOT NULL
+),
+numbered_usage AS (
+    SELECT line_id, occupied_at, released_at,
+        SUM(CASE WHEN previous_end IS NULL OR occupied_at > previous_end THEN 1 ELSE 0 END) OVER (
+            PARTITION BY line_id ORDER BY occupied_at, usage_id
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ) AS group_id
+    FROM ordered_usage
+),
+continuous_usage AS (
+    SELECT line_id, MAX(released_at) - MIN(occupied_at) AS duration
+    FROM numbered_usage
+    GROUP BY line_id, group_id
+),
+longest_usage AS (
+    SELECT line_id, MAX(duration) AS duration
+    FROM continuous_usage
+    GROUP BY line_id
+),
+usage_totals AS (
+    SELECT line_id, AVG(released_at - occupied_at) AS avg_duration,
+        MAX(occupied_at) AS last_occupied_at
+    FROM runway_usage
     GROUP BY line_id
 )
 SELECT l.line_id, a.name AS airport, l.direction, l.is_free,
-       COALESCE(e.takeoff_count, 0) AS takeoff_count,
-       COALESCE(e.landing_count, 0) AS landing_count,
-       NULL::interval AS avg_occupancy_time,
-       NULL::interval AS max_continuous_use_time,
-       COALESCE(e.peak_daily_operations, 0) AS peak_daily_operations,
-       e.last_used_at
+    COALESCE(e.takeoff_count, 0) AS takeoff_count,
+    COALESCE(e.landing_count, 0) AS landing_count,
+    u.avg_duration AS avg_occupancy_time,
+    longest.duration AS max_continuous_use_time,
+    GREATEST(e.last_operation_at, u.last_occupied_at) AS last_used_at
 FROM line AS l
 JOIN airport AS a ON a.airport_id = l.airport_id
 LEFT JOIN event_totals AS e ON e.line_id = l.line_id
+LEFT JOIN usage_totals AS u ON u.line_id = l.line_id
+LEFT JOIN longest_usage AS longest ON longest.line_id = l.line_id
 ORDER BY a.name, l.line_id;
 
 WITH departure_deviations AS (
@@ -154,7 +184,7 @@ WITH departure_deviations AS (
     FROM flight
     WHERE actual_takeoff_time IS NOT NULL
 )
-SELECT f.flight_id, origin.name AS departure_airport, NULL::text AS destination_airport,
+SELECT f.flight_id, origin.name AS departure_airport, planned_destination.name AS destination_airport,
        destination.name AS actual_landing_airport,
        f.planned_takeoff_time, f.actual_takeoff_time,
        ROUND(d.deviation_minutes, 2) AS departure_deviation_minutes,
@@ -170,42 +200,37 @@ SELECT f.flight_id, origin.name AS departure_airport, NULL::text AS destination_
        END AS flight_status
 FROM flight AS f
 LEFT JOIN departure_deviations AS d ON d.flight_id = f.flight_id
+JOIN airport AS planned_destination ON planned_destination.airport_id = f.destination_airport_id
 JOIN line AS takeoff_line ON takeoff_line.line_id = f.takeoff_line_id
 JOIN airport AS origin ON origin.airport_id = takeoff_line.airport_id
 LEFT JOIN LATERAL (
     SELECT l.line_id
     FROM landing AS l
     WHERE l.flight_id = f.flight_id AND l.landing_time = f.actual_land_time
-    ORDER BY l.landing_id DESC
+    ORDER BY (l.line_id IS NOT NULL) DESC, l.landing_id DESC
     LIMIT 1
 ) AS actual_landing ON TRUE
 LEFT JOIN line AS landing_line ON landing_line.line_id = actual_landing.line_id
 LEFT JOIN airport AS destination ON destination.airport_id = landing_line.airport_id
 ORDER BY f.planned_takeoff_time, f.flight_id;
 
-WITH mechanic_mentions AS (
-    SELECT j.journal_id, j.action_time,
-           SUBSTRING(j.action_description FROM '; (?:demo )?mechanic ([0-9]+)$') AS mechanic_id
-    FROM journal AS j
-    JOIN airplane AS a ON a.airplane_id = j.object_id
-),
-mechanic_stats AS (
-    SELECT e.employee_id, CONCAT_WS(' ', e.lastname, e.firstname, e.middle_name) AS full_name,
-           e.working_place AS airport,
-           NULL::bigint AS inspection_count,
-           NULL::bigint AS serviceable_airplanes,
-           NULL::bigint AS unserviceable_airplanes,
-           NULL::numeric AS critical_defect_pct,
-           NULL::interval AS avg_inspection_time,
-           NULL::timestamptz AS last_inspection_at,
-           COUNT(j.journal_id) AS journal_mention_count,
-           MAX(j.action_time) AS last_journal_mention_at
+WITH mechanic_stats AS (
+    SELECT e.employee_id,
+        CONCAT_WS(' ', e.lastname, e.firstname, e.middle_name) AS full_name,
+        e.working_place AS airport,
+        COUNT(i.inspection_id) AS inspection_count,
+        COUNT(DISTINCT i.airplane_id) FILTER (WHERE i.result = 'serviceable') AS serviceable_airplanes,
+        COUNT(DISTINCT i.airplane_id) FILTER (WHERE i.result = 'critical_defect') AS unserviceable_airplanes,
+        ROUND(100.0 * COUNT(*) FILTER (WHERE i.result = 'critical_defect')
+            / NULLIF(COUNT(i.inspection_id), 0), 2) AS critical_defect_pct,
+        AVG(i.finished_at - i.started_at) AS avg_inspection_time,
+        MAX(i.finished_at) AS last_inspection_at
     FROM employee AS e
     JOIN employee_position AS p ON p.position_id = e.position_id
-    LEFT JOIN mechanic_mentions AS j ON j.mechanic_id = e.employee_id::text
+    LEFT JOIN aircraft_inspection AS i ON i.mechanic_id = e.employee_id AND i.finished_at IS NOT NULL
     WHERE p.name = 'mechanic'
     GROUP BY e.employee_id
 )
-SELECT m.*, DENSE_RANK() OVER (ORDER BY journal_mention_count DESC) AS journal_mention_rank
+SELECT m.*, DENSE_RANK() OVER (ORDER BY inspection_count DESC) AS inspection_rank
 FROM mechanic_stats AS m
-ORDER BY journal_mention_rank, employee_id;
+ORDER BY inspection_rank, employee_id;
