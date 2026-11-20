@@ -17,6 +17,9 @@
 
 
 
+
+-- 1
+
 WITH completed_flights AS (
     SELECT f.airplane_id,
         COUNT(f.actual_land_time) AS completed_count,
@@ -50,6 +53,14 @@ JOIN flight_status AS s ON s.status_id = p.status_id
 LEFT JOIN completed_flights AS c ON c.airplane_id = p.airplane_id
 LEFT JOIN last_departures AS d ON d.airplane_id = p.airplane_id
 ORDER BY p.airplane_id;
+
+
+
+
+
+
+
+-- 2
 
 WITH report_snapshot AS (
     SELECT COALESCE(MAX(time_utc), CURRENT_TIMESTAMP) AS as_of
@@ -110,6 +121,14 @@ SELECT d.employee_id, full_name, airport, active_airplanes, assignments_in_perio
 FROM airport_load AS d
 LEFT JOIN unassigned_dispatchers AS u ON u.employee_id = d.employee_id
 ORDER BY airport, active_airplanes DESC, d.employee_id;
+
+
+
+
+
+
+
+-- 3
 
 WITH runway_events AS (
     SELECT takeoff_line_id AS line_id, actual_takeoff_time AS happened_at,
@@ -175,6 +194,14 @@ LEFT JOIN usage_totals AS u ON u.line_id = l.line_id
 LEFT JOIN longest_usage AS longest ON longest.line_id = l.line_id
 ORDER BY a.name, l.line_id;
 
+
+
+
+
+
+
+-- 4
+
 WITH departure_deviations AS (
     SELECT flight_id,
            EXTRACT(EPOCH FROM (actual_takeoff_time - planned_takeoff_time)) / 60 AS deviation_minutes,
@@ -213,6 +240,13 @@ LEFT JOIN LATERAL (
 LEFT JOIN line AS landing_line ON landing_line.line_id = actual_landing.line_id
 LEFT JOIN airport AS destination ON destination.airport_id = landing_line.airport_id
 ORDER BY f.planned_takeoff_time, f.flight_id;
+
+
+
+
+
+
+-- 5
 
 WITH mechanic_stats AS (
     SELECT e.employee_id,
